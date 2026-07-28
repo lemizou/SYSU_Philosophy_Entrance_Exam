@@ -1,0 +1,499 @@
+{
+  "version": 1,
+  "types": {
+    "philosopher": "哲学家或人物组合",
+    "school": "流派或思想传统",
+    "period": "历史时期或思想运动",
+    "topic": "问题或研究主题",
+    "work": "著作"
+  },
+  "tags": [
+    {
+      "name": "严复",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "二程",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "亚里士多德",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "休谟",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "公孙龙",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "冯耀明",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "卢梭",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "叔本华",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "司各脱",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "周敦颐",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "培根",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "墨子",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "奥卡姆",
+      "type": "philosopher",
+      "aliases": [
+        "奥康"
+      ]
+    },
+    {
+      "name": "奥古斯丁",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "孔子",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "孟子",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "孟德斯鸠",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "安瑟尔谟",
+      "type": "philosopher",
+      "aliases": [
+        "安瑟伦"
+      ]
+    },
+    {
+      "name": "尼采",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "嵇康",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "巴门尼德",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "庄子",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "康德",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "张载",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "德谟克里特",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "成玄英",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "戴震",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "斯宾诺莎",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "普罗提诺",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "普罗泰戈拉",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "朱熹",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "柏拉图",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "毕达哥拉斯",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "洛克",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "王充",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "王夫之",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "王弼",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "王阳明",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "皮浪",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "程颐",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "程颢",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "笛卡尔",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "老子",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "胡塞尔",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "芝诺",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "苏格拉底",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "荀子",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "莱布尼茨",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "葛洪",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "董仲舒",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "贝克莱",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "费希特",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "赫拉克利特",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "邵雍",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "郭象",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "阿奎纳",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "阿那克萨戈拉",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "陆九渊",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "霍布斯",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "韩愈",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "黄宗羲",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "黑格尔",
+      "type": "philosopher",
+      "aliases": []
+    },
+    {
+      "name": "佛教",
+      "type": "school",
+      "aliases": [
+        "佛学"
+      ]
+    },
+    {
+      "name": "儒家",
+      "type": "school",
+      "aliases": []
+    },
+    {
+      "name": "先验哲学",
+      "type": "school",
+      "aliases": []
+    },
+    {
+      "name": "名家",
+      "type": "school",
+      "aliases": []
+    },
+    {
+      "name": "唯理论",
+      "type": "school",
+      "aliases": []
+    },
+    {
+      "name": "墨家",
+      "type": "school",
+      "aliases": []
+    },
+    {
+      "name": "宋明理学",
+      "type": "school",
+      "aliases": [
+        "宋明理学-其他"
+      ]
+    },
+    {
+      "name": "早期儒学",
+      "type": "school",
+      "aliases": []
+    },
+    {
+      "name": "智者",
+      "type": "school",
+      "aliases": []
+    },
+    {
+      "name": "法家",
+      "type": "school",
+      "aliases": []
+    },
+    {
+      "name": "稷下道家",
+      "type": "school",
+      "aliases": []
+    },
+    {
+      "name": "经验论",
+      "type": "school",
+      "aliases": []
+    },
+    {
+      "name": "道家",
+      "type": "school",
+      "aliases": []
+    },
+    {
+      "name": "阴阳家",
+      "type": "school",
+      "aliases": []
+    },
+    {
+      "name": "魏晋玄学",
+      "type": "school",
+      "aliases": []
+    },
+    {
+      "name": "黄老之学",
+      "type": "school",
+      "aliases": [
+        "黄老道家"
+      ]
+    },
+    {
+      "name": "中世纪哲学",
+      "type": "period",
+      "aliases": []
+    },
+    {
+      "name": "前苏格拉底哲学",
+      "type": "period",
+      "aliases": []
+    },
+    {
+      "name": "启蒙运动",
+      "type": "period",
+      "aliases": []
+    },
+    {
+      "name": "近代哲学",
+      "type": "period",
+      "aliases": []
+    },
+    {
+      "name": "上帝存在证明",
+      "type": "topic",
+      "aliases": []
+    },
+    {
+      "name": "个人同一性",
+      "type": "topic",
+      "aliases": []
+    },
+    {
+      "name": "信仰与理性",
+      "type": "topic",
+      "aliases": []
+    },
+    {
+      "name": "共相问题",
+      "type": "topic",
+      "aliases": []
+    },
+    {
+      "name": "唯名论",
+      "type": "topic",
+      "aliases": []
+    },
+    {
+      "name": "唯名论与唯实论",
+      "type": "topic",
+      "aliases": []
+    },
+    {
+      "name": "怀疑论",
+      "type": "topic",
+      "aliases": []
+    },
+    {
+      "name": "性命说",
+      "type": "topic",
+      "aliases": []
+    },
+    {
+      "name": "自由意志",
+      "type": "topic",
+      "aliases": []
+    },
+    {
+      "name": "西方哲学史综合",
+      "type": "topic",
+      "aliases": [
+        "西方哲学史-综合"
+      ]
+    },
+    {
+      "name": "认识论",
+      "type": "topic",
+      "aliases": []
+    },
+    {
+      "name": "身心问题",
+      "type": "topic",
+      "aliases": []
+    },
+    {
+      "name": "道德哲学",
+      "type": "topic",
+      "aliases": []
+    }
+  ]
+}

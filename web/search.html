@@ -1,0 +1,1240 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>中大哲学 · 历年真题检索</title>
+  <style>
+    :root {
+      --ink: #173b73;
+      --ink-dark: #102a52;
+      --paper: #f4f7fb;
+      --white: #fff;
+      --line: #d8e2ef;
+      --muted: #627188;
+      --accent: #c64132;
+      --pale: #eaf0f8;
+      --shadow: 0 18px 55px rgba(16, 42, 82, .12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--paper);
+      color: var(--ink-dark);
+      font-family: "Microsoft YaHei UI", "PingFang SC", sans-serif;
+    }
+    header {
+      position: relative;
+      overflow: hidden;
+      background: var(--ink);
+      color: white;
+      padding: 28px max(28px, calc((100vw - 1280px) / 2));
+    }
+    header::after {
+      content: "哲";
+      position: absolute;
+      right: 5vw;
+      top: -42px;
+      color: rgba(255, 255, 255, .055);
+      font: 190px/1 SimSun, serif;
+      pointer-events: none;
+    }
+    .title-row { display: flex; align-items: center; gap: 16px; }
+    h1 { margin: 0; font: 700 28px/1.25 SimSun, "STSong", serif; letter-spacing: .04em; }
+    .count-badge {
+      padding: 5px 11px;
+      background: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    header p { margin: 8px 0 0; color: #cfdbeb; font-size: 14px; }
+    main {
+      width: min(1280px, calc(100% - 56px));
+      margin: 0 auto;
+      padding: 24px 0 32px;
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(250px, 1fr) 175px auto;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .filter-strip {
+      display: grid;
+      grid-template-columns: auto 122px 122px minmax(145px, .8fr) 170px 150px auto;
+      gap: 8px;
+      align-items: stretch;
+      margin-bottom: 18px;
+      padding: 9px 10px;
+      border: 1px solid var(--line);
+      background: #eaf0f8;
+    }
+    .filter-strip-title {
+      display: grid;
+      place-items: center;
+      padding: 0 7px;
+      color: var(--ink);
+      font: 700 12px/1 SimSun, "STSong", serif;
+      letter-spacing: .08em;
+    }
+    .filter-control {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 4px;
+      min-width: 0;
+    }
+    .filter-control span {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .filter-control select { min-height: 34px; width: 100%; }
+    .reset-structured {
+      align-self: end;
+      min-height: 34px;
+      padding: 0 11px;
+      border: 1px solid #b8c7d9;
+      background: transparent;
+      color: var(--ink);
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .reset-structured:hover { background: white; }
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: var(--white);
+      border: 1px solid var(--line);
+      transition: border-color .16s, box-shadow .16s;
+    }
+    .search-box:focus-within {
+      border-color: var(--ink);
+      box-shadow: 0 0 0 3px rgba(23, 59, 115, .1);
+    }
+    .search-box label { padding: 0 12px; color: var(--ink); font-size: 12px; font-weight: 700; }
+    input, select, button { font: inherit; }
+    input {
+      width: 100%;
+      border: 0;
+      outline: 0;
+      padding: 12px 10px 12px 0;
+      color: var(--ink-dark);
+      background: transparent;
+    }
+    select {
+      border: 1px solid var(--line);
+      background: var(--white);
+      color: var(--ink-dark);
+      padding: 0 11px;
+      outline: 0;
+    }
+    select:focus-visible, button:focus-visible {
+      outline: 3px solid rgba(23, 59, 115, .2);
+      outline-offset: 1px;
+    }
+    button {
+      border: 0;
+      padding: 0 19px;
+      background: var(--accent);
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button:hover { background: #aa352a; }
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(480px, 1.35fr) minmax(340px, .85fr);
+      min-height: 545px;
+      background: var(--white);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--line);
+    }
+    .search-layout {
+      display: grid;
+      grid-template-columns: 282px minmax(0, 1fr);
+      gap: 16px;
+      align-items: stretch;
+    }
+    .tag-panel {
+      height: 547px;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: var(--white);
+      border: 1px solid var(--line);
+      box-shadow: 0 12px 38px rgba(16, 42, 82, .08);
+    }
+    .tag-panel-head {
+      min-height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 14px 0 16px;
+      background: var(--ink);
+      color: white;
+    }
+    .tag-panel-title {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      font: 700 15px/1 SimSun, "STSong", serif;
+    }
+    .tag-panel-title span {
+      color: #cbd8e9;
+      font: 400 11px/1.2 "Microsoft YaHei UI", sans-serif;
+    }
+    .clear-tags {
+      min-height: 30px;
+      padding: 0 8px;
+      border: 1px solid rgba(255, 255, 255, .28);
+      background: transparent;
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .clear-tags:hover:not(:disabled) { background: rgba(255, 255, 255, .1); }
+    .clear-tags:disabled { opacity: .38; cursor: default; }
+    .tag-tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-bottom: 1px solid var(--line);
+    }
+    .tag-tab {
+      min-height: 42px;
+      padding: 6px 4px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: #f8fafc;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .tag-tab:nth-child(3n) { border-right: 0; }
+    .tag-tab:hover { background: var(--pale); color: var(--ink); }
+    .tag-tab.active {
+      background: var(--white);
+      color: var(--ink);
+      box-shadow: inset 0 -3px var(--accent);
+    }
+    .tag-tab strong {
+      display: inline-block;
+      min-width: 17px;
+      margin-left: 3px;
+      color: var(--accent);
+      font-size: 10px;
+    }
+    .tag-tools {
+      padding: 12px 12px 9px;
+      border-bottom: 1px solid var(--line);
+    }
+    .tag-search {
+      display: flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      background: #fbfcfe;
+    }
+    .tag-search label {
+      padding-left: 9px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .tag-search input { padding: 8px 8px; font-size: 12px; }
+    .tag-mode-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+    .tag-mode {
+      display: inline-flex;
+      border: 1px solid var(--line);
+    }
+    .tag-mode button {
+      min-height: 26px;
+      padding: 0 9px;
+      background: white;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .tag-mode button + button { border-left: 1px solid var(--line); }
+    .tag-mode button:hover { background: var(--pale); color: var(--ink); }
+    .tag-mode button.active {
+      background: var(--ink);
+      color: white;
+    }
+    .tag-list {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding: 4px 0 10px;
+    }
+    .tag-option {
+      width: 100%;
+      min-height: 36px;
+      display: grid;
+      grid-template-columns: 16px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 13px;
+      background: white;
+      color: var(--ink-dark);
+      text-align: left;
+      font-size: 12px;
+      font-weight: 400;
+    }
+    .tag-option:hover { background: #f5f8fc; }
+    .tag-option.selected {
+      background: #e8eef7;
+      box-shadow: inset 4px 0 var(--accent);
+      color: var(--ink);
+      font-weight: 700;
+    }
+    .tag-mark {
+      width: 14px;
+      height: 14px;
+      display: grid;
+      place-items: center;
+      border: 1px solid #aab9cc;
+      color: white;
+      font-size: 10px;
+      line-height: 1;
+    }
+    .tag-option.selected .tag-mark {
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+    .tag-count {
+      min-width: 24px;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+    .tag-empty {
+      padding: 24px 16px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+    .results-panel { min-width: 0; border-right: 1px solid var(--line); }
+    .panel-head {
+      height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      background: var(--pale);
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .panel-head span { color: var(--muted); font-weight: 400; }
+    .results { height: 499px; overflow: auto; }
+    .result {
+      width: 100%;
+      border-bottom: 1px solid #edf1f6;
+      background: white;
+      color: var(--ink-dark);
+    }
+    .result.active {
+      background: #e2ebf7;
+      box-shadow: inset 4px 0 var(--ink);
+    }
+    .result-summary {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 58px 94px 86px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 14px 16px 8px;
+      background: transparent;
+      color: var(--ink-dark);
+      text-align: left;
+      font-weight: 400;
+    }
+    .result-summary:hover { background: #f7f9fc; }
+    .result.active .result-summary:hover { background: rgba(255, 255, 255, .18); }
+    .result-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      padding: 0 16px 12px 284px;
+    }
+    .meta { color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .question { font-size: 14px; line-height: 1.6; }
+    .result-copy { min-width: 0; }
+    .match-fields {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+      margin-top: 7px;
+    }
+    .match-fields-label {
+      margin-right: 1px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+    .match-field {
+      padding: 2px 6px;
+      border: 1px solid #ccd7e5;
+      background: #f6f8fb;
+      color: #53657b;
+      font-size: 10px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    .result-snippet {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.55;
+    }
+    mark.match {
+      padding: 0 .08em;
+      background: #ffed9f;
+      box-shadow: inset 0 -1px #d6a72d;
+      color: inherit;
+    }
+    .filter-tag {
+      --tag-color: #496b9e;
+      min-height: 27px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      border: 1px solid color-mix(in srgb, var(--tag-color) 38%, white);
+      background: color-mix(in srgb, var(--tag-color) 7%, white);
+      color: var(--tag-color);
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+    .filter-tag::before {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--tag-color);
+      content: "";
+    }
+    .filter-tag:hover {
+      border-color: var(--tag-color);
+      background: color-mix(in srgb, var(--tag-color) 14%, white);
+    }
+    .filter-tag.selected {
+      background: var(--tag-color);
+      color: white;
+    }
+    .filter-tag.selected::before { background: white; }
+    .filter-tag[data-filter-field="schools"] { --tag-color: #367667; }
+    .filter-tag[data-filter-field="periods"] { --tag-color: #876a28; }
+    .filter-tag[data-filter-field="topics"] { --tag-color: #a2463d; }
+    .filter-tag[data-filter-field="works"] { --tag-color: #74558e; }
+    .record-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+    .detail-panel { min-width: 0; }
+    .detail {
+      height: 499px;
+      padding: 24px 26px;
+      overflow: auto;
+    }
+    .detail h2 {
+      margin: 0 0 4px;
+      color: var(--ink);
+      font: 700 21px/1.4 SimSun, "STSong", serif;
+    }
+    .detail .subline { margin: 0 0 24px; color: var(--muted); font-size: 13px; }
+    .detail-match { margin: -14px 0 22px; }
+    .detail section { margin: 0 0 21px; }
+    .detail h3 {
+      margin: 0 0 6px;
+      color: var(--accent);
+      font-size: 12px;
+      letter-spacing: .08em;
+    }
+    .detail p { margin: 0; font-size: 14px; line-height: 1.85; white-space: pre-wrap; }
+    .empty { color: var(--muted); padding: 42px 24px; line-height: 1.8; }
+    footer {
+      display: flex;
+      justify-content: space-between;
+      padding-top: 12px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    @media (max-width: 850px) {
+      main { width: min(100% - 28px, 680px); }
+      .controls { grid-template-columns: 1fr 1fr; }
+      .search-box { grid-column: 1 / -1; }
+      #search { min-height: 44px; }
+      .workspace { grid-template-columns: 1fr; }
+      .results-panel { border-right: 0; border-bottom: 1px solid var(--line); }
+      .results { height: 380px; }
+      .detail { height: auto; min-height: 360px; }
+      .filter-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .filter-strip-title { display: none; }
+      .reset-structured { min-height: 42px; }
+    }
+    @media (max-width: 1200px) {
+      .search-layout { grid-template-columns: 1fr; }
+      .tag-panel { height: auto; max-height: 410px; }
+      .tag-tabs { grid-template-columns: repeat(5, 1fr); }
+      .tag-tab { border-bottom: 0; }
+      .tag-tab:nth-child(3n) { border-right: 1px solid var(--line); }
+      .tag-tab:last-child { border-right: 0; }
+      .tag-list { min-height: 150px; }
+    }
+    @media (max-width: 560px) {
+      .tag-tabs { grid-template-columns: repeat(3, 1fr); }
+      .tag-tab { border-bottom: 1px solid var(--line); }
+      .tag-tab:nth-child(3n) { border-right: 0; }
+      .result-summary {
+        grid-template-columns: 52px 1fr;
+        gap: 6px 10px;
+      }
+      .result-summary .result-copy { grid-column: 1 / -1; }
+      .result-tags { padding-left: 16px; }
+      .filter-strip { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .workspace { animation: arrive .28s ease-out both; }
+      @keyframes arrive { from { opacity: 0; transform: translateY(6px); } }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title-row">
+      <h1>中大哲学 · 历年真题</h1>
+      <span class="count-badge" id="total">载入中</span>
+    </div>
+    <p>在题干、材料和分类标签中检索，按年份与科目缩小范围。</p>
+  </header>
+
+  <main>
+    <div class="controls">
+      <div class="search-box">
+        <label for="keyword">检索</label>
+        <input id="keyword" autocomplete="off" placeholder="例如：康德 先验、康德 OR 黑格尔、-费希特">
+      </div>
+      <select id="subject" aria-label="按科目筛选"><option value="">全部科目</option></select>
+      <button id="search" type="button">查找真题</button>
+    </div>
+    <div class="filter-strip" aria-label="结构化筛选和排序">
+      <div class="filter-strip-title">检索条件</div>
+      <label class="filter-control">
+        <span>起始年份</span>
+        <select id="yearFrom"><option value="">不限</option></select>
+      </label>
+      <label class="filter-control">
+        <span>终止年份</span>
+        <select id="yearTo"><option value="">不限</option></select>
+      </label>
+      <label class="filter-control">
+        <span>题型</span>
+        <select id="sectionFilter"><option value="">全部题型</option></select>
+      </label>
+      <label class="filter-control">
+        <span>校对状态</span>
+        <select id="verificationFilter">
+          <option value="">全部状态</option>
+          <option value="cross_checked">双来源核对</option>
+          <option value="single_source">单一来源</option>
+        </select>
+      </label>
+      <label class="filter-control">
+        <span>结果排序</span>
+        <select id="sortMode">
+          <option value="relevance">相关度</option>
+          <option value="year_desc">年份从新到旧</option>
+          <option value="year_asc">年份从旧到新</option>
+        </select>
+      </label>
+      <button class="reset-structured" id="resetStructured" type="button">
+        重置条件
+      </button>
+    </div>
+
+    <div class="search-layout">
+      <aside class="tag-panel" aria-label="分类标签筛选">
+        <div class="tag-panel-head">
+          <div class="tag-panel-title">索引筛选 <span id="selectedTagCount">未选择</span></div>
+          <button class="clear-tags" id="clearTags" type="button" disabled>清空</button>
+        </div>
+        <div class="tag-tabs" id="tagTabs"></div>
+        <div class="tag-tools">
+          <div class="tag-search">
+            <label for="tagSearch">标签</label>
+            <input id="tagSearch" autocomplete="off" placeholder="筛选当前分类">
+          </div>
+          <div class="tag-mode-row">
+            <span>多选关系</span>
+            <div class="tag-mode" id="tagMode" aria-label="标签多选关系">
+              <button type="button" data-mode="any">任一</button>
+              <button type="button" data-mode="all">全部</button>
+            </div>
+          </div>
+        </div>
+        <div class="tag-list" id="tagList"></div>
+      </aside>
+
+      <div class="workspace">
+        <section class="results-panel">
+          <div class="panel-head">检索结果 <span id="resultCount"></span></div>
+          <div class="results" id="results"></div>
+        </section>
+        <aside class="detail-panel">
+          <div class="panel-head">试题详情 <span id="recordId"></span></div>
+          <div class="detail" id="detail"></div>
+        </aside>
+      </div>
+    </div>
+    <footer>
+      <span>筛选条件会写入网址，可复制当前链接</span>
+      <span>空格 AND · OR 任选 · “短语” · -排除 · Esc 清空</span>
+    </footer>
+  </main>
+
+  <script src="search_query.js"></script>
+  <script src="tag_filters.js"></script>
+  <script src="search_highlight.js"></script>
+  <script src="result_sort.js"></script>
+  <script src="url_state.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let questions = [];
+    let aliasMap = new Map();
+    let tagCatalog = [];
+    let tagCounts = new Map();
+    let filtered = [];
+    let availableYears = [];
+    let activeIndex = 0;
+    let activeTagField = "philosophers";
+    let activeKeywordQuery = { positiveGroups: [], excludedTerms: [] };
+    let urlStateReady = false;
+
+    const normalize = (value) =>
+      String(value ?? "").toLocaleLowerCase().replace(/\s+/g, "");
+    const escapeHtml = (value) =>
+      String(value ?? "").replace(/[&<>"']/g, (c) =>
+        ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[c]);
+    const tagFields = ["philosophers", "schools", "periods", "topics", "works"];
+    const selectedTags = Object.fromEntries(tagFields.map((field) => [field, []]));
+    const tagModes = Object.fromEntries(tagFields.map((field) => [field, "any"]));
+    const tagFieldConfig = {
+      philosophers: { label: "人物", type: "philosopher" },
+      schools: { label: "流派", type: "school" },
+      periods: { label: "时期", type: "period" },
+      topics: { label: "主题", type: "topic" },
+      works: { label: "著作", type: "work" }
+    };
+    const fieldByTagType = Object.fromEntries(
+      Object.entries(tagFieldConfig).map(([field, config]) => [config.type, field])
+    );
+    const tagsFor = (question) =>
+      tagFields.flatMap((field) => question[field] || []);
+    const canonicalize = (value) => {
+      const normalized = normalize(value);
+      return normalize(aliasMap.get(normalized) || value);
+    };
+    const normalizeSubject = (value) =>
+      value === "西方哲学史" ? "外国哲学史" : value;
+
+    function buildSearchConditions() {
+      const yearFrom = Number($("yearFrom").value) || null;
+      const yearTo = Number($("yearTo").value) || null;
+      const subject = $("subject").value;
+      return {
+        keyword: $("keyword").value,
+        tags: Object.fromEntries(
+          tagFields.map((field) => [field, [...selectedTags[field]]])
+        ),
+        tagModes: { ...tagModes },
+        years: yearFrom === null && yearTo === null
+          ? []
+          : availableYears.filter((year) =>
+            (yearFrom === null || year >= yearFrom)
+            && (yearTo === null || year <= yearTo)),
+        subjects: subject ? [subject] : [],
+        sections: $("sectionFilter").value ? [$("sectionFilter").value] : [],
+        verification: $("verificationFilter").value
+          ? [$("verificationFilter").value]
+          : [],
+        sortMode: $("sortMode").value
+      };
+    }
+
+    function captureUrlState() {
+      return {
+        keyword: $("keyword").value,
+        subject: $("subject").value,
+        yearFrom: $("yearFrom").value,
+        yearTo: $("yearTo").value,
+        section: $("sectionFilter").value,
+        verification: $("verificationFilter").value,
+        sortMode: $("sortMode").value,
+        tags: Object.fromEntries(
+          tagFields.map((field) => [field, [...selectedTags[field]]])
+        ),
+        tagModes: { ...tagModes }
+      };
+    }
+
+    function selectHasValue(id, value) {
+      return [...$(id).options].some((option) => option.value === value);
+    }
+
+    function canonicalTagForField(field, value) {
+      const canonical = aliasMap.get(normalize(value)) || value;
+      return tagCatalog.find((tag) =>
+        tag.field === field && normalize(tag.name) === normalize(canonical))?.name;
+    }
+
+    function restoreUrlState(state) {
+      $("keyword").value = state.keyword;
+      $("subject").value = selectHasValue("subject", state.subject)
+        ? state.subject
+        : "";
+      $("sectionFilter").value = selectHasValue("sectionFilter", state.section)
+        ? state.section
+        : "";
+      $("verificationFilter").value =
+        selectHasValue("verificationFilter", state.verification)
+          ? state.verification
+          : "";
+      $("sortMode").value = ResultSort.MODES.includes(state.sortMode)
+        ? state.sortMode
+        : "relevance";
+
+      let yearFrom = selectHasValue("yearFrom", state.yearFrom)
+        ? state.yearFrom
+        : "";
+      let yearTo = selectHasValue("yearTo", state.yearTo)
+        ? state.yearTo
+        : "";
+      if (yearFrom && yearTo && Number(yearFrom) > Number(yearTo)) {
+        [yearFrom, yearTo] = [yearTo, yearFrom];
+      }
+      $("yearFrom").value = yearFrom;
+      $("yearTo").value = yearTo;
+
+      for (const field of tagFields) {
+        const restoredTags = (state.tags[field] || [])
+          .map((value) => canonicalTagForField(field, value))
+          .filter(Boolean);
+        selectedTags[field].splice(
+          0,
+          selectedTags[field].length,
+          ...new Set(restoredTags)
+        );
+        tagModes[field] = state.tagModes[field] === "all" ? "all" : "any";
+      }
+      activeTagField =
+        tagFields.find((field) => selectedTags[field].length)
+        || "philosophers";
+      $("tagSearch").value = "";
+    }
+
+    function syncUrlState(historyMode) {
+      if (!urlStateReady || historyMode === "none") return;
+      const query = UrlState.serialize(captureUrlState());
+      const nextSearch = query ? `?${query}` : "";
+      if (nextSearch === window.location.search) return;
+      const nextUrl = `${window.location.pathname}${nextSearch}${window.location.hash}`;
+      if (historyMode === "replace") {
+        window.history.replaceState(null, "", nextUrl);
+      } else {
+        window.history.pushState(null, "", nextUrl);
+      }
+    }
+
+    function matchesTagFilter(question, field, requested, mode) {
+      return TagFilters.matches(
+        question[field] || [],
+        requested,
+        mode,
+        canonicalize
+      );
+    }
+
+    function matchesSearchConditions(question, conditions) {
+      if (conditions.keywordQuery) {
+        const haystack = [question.question, question.passage, ...tagsFor(question)]
+          .map(normalize).join("|");
+        const contains = (term) => haystack.includes(canonicalize(term));
+        if (!SearchQuery.matches(conditions.keywordQuery, contains)) return false;
+      }
+      if (conditions.years.length && !conditions.years.includes(question.year)) {
+        return false;
+      }
+      if (
+        conditions.subjects.length
+        && !conditions.subjects.map(normalizeSubject)
+          .includes(normalizeSubject(question.subject))
+      ) {
+        return false;
+      }
+      if (
+        conditions.sections.length
+        && !conditions.sections.includes(question.section)
+      ) {
+        return false;
+      }
+      if (
+        conditions.verification.length
+        && !conditions.verification.includes(question.verification)
+      ) {
+        return false;
+      }
+      return tagFields.every((field) =>
+        matchesTagFilter(
+          question,
+          field,
+          conditions.tags[field] || [],
+          conditions.tagModes[field] || "any"
+        )
+      );
+    }
+
+    function populateFilters() {
+      availableYears = [...new Set(questions.map((q) => q.year))]
+        .sort((a, b) => a - b);
+      const subjects = [...new Set(questions.map((q) => q.subject))].sort();
+      const yearOptions = [...availableYears].reverse()
+        .map((value) => `<option value="${value}">${value}</option>`).join("");
+      $("yearFrom").insertAdjacentHTML("beforeend", yearOptions);
+      $("yearTo").insertAdjacentHTML("beforeend", yearOptions);
+      $("subject").insertAdjacentHTML("beforeend",
+        subjects.map((v) => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join(""));
+      const sectionCounts = new Map();
+      questions.forEach((question) => {
+        const section = question.section || "未标注";
+        sectionCounts.set(section, (sectionCounts.get(section) || 0) + 1);
+      });
+      const sections = [...sectionCounts]
+        .sort((left, right) =>
+          right[1] - left[1] || left[0].localeCompare(right[0], "zh-CN"));
+      $("sectionFilter").insertAdjacentHTML(
+        "beforeend",
+        sections.map(([name, count]) =>
+          `<option value="${escapeHtml(name)}">${escapeHtml(name)}（${count}）</option>`
+        ).join("")
+      );
+    }
+
+    function prepareTagCatalog(taxonomy) {
+      tagCatalog = (taxonomy.tags || [])
+        .map((tag) => ({
+          name: tag.name,
+          field: fieldByTagType[tag.type]
+        }))
+        .filter((tag) => tag.name && tag.field);
+      tagCounts = TagFilters.countByField(questions, tagFields);
+    }
+
+    function renderTagPanel() {
+      const totalSelected = tagFields.reduce(
+        (total, field) => total + selectedTags[field].length, 0);
+      $("selectedTagCount").textContent =
+        totalSelected ? `已选 ${totalSelected} 项` : "未选择";
+      $("clearTags").disabled = totalSelected === 0;
+
+      $("tagTabs").innerHTML = tagFields.map((field) => {
+        const config = tagFieldConfig[field];
+        const selectedCount = selectedTags[field].length;
+        const catalogCount = tagCatalog.filter((tag) => tag.field === field).length;
+        const count = selectedCount ? `${selectedCount}/${catalogCount}` : catalogCount;
+        return `
+          <button class="tag-tab ${field === activeTagField ? "active" : ""}"
+            type="button" data-field="${field}"
+            aria-pressed="${field === activeTagField}">
+            ${config.label}<strong>${count}</strong>
+          </button>`;
+      }).join("");
+
+      $("tagMode").querySelectorAll("[data-mode]").forEach((button) => {
+        const active = button.dataset.mode === tagModes[activeTagField];
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+
+      const needle = normalize($("tagSearch").value);
+      const selected = new Set(selectedTags[activeTagField]);
+      const visibleTags = tagCatalog
+        .filter((tag) =>
+          tag.field === activeTagField
+          && (
+            selected.has(tag.name)
+            || !needle
+            || normalize(tag.name).includes(needle)
+          ))
+        .sort((left, right) => {
+          const selectedOrder =
+            Number(selected.has(right.name)) - Number(selected.has(left.name));
+          if (selectedOrder) return selectedOrder;
+          const countOrder =
+            (tagCounts.get(`${activeTagField}\u0000${right.name}`) || 0)
+            - (tagCounts.get(`${activeTagField}\u0000${left.name}`) || 0);
+          return countOrder || left.name.localeCompare(right.name, "zh-CN");
+        });
+
+      if (!visibleTags.length) {
+        const message = tagCatalog.some((tag) => tag.field === activeTagField)
+          ? "没有匹配的标签，请减少输入内容。"
+          : "当前题库尚无这一类标签。";
+        $("tagList").innerHTML = `<div class="tag-empty">${message}</div>`;
+        return;
+      }
+
+      $("tagList").innerHTML = visibleTags.map((tag) => {
+        const isSelected = selected.has(tag.name);
+        const count = tagCounts.get(`${activeTagField}\u0000${tag.name}`) || 0;
+        return `
+          <button class="tag-option ${isSelected ? "selected" : ""}"
+            type="button" data-field="${activeTagField}"
+            data-tag="${escapeHtml(tag.name)}" aria-pressed="${isSelected}">
+            <span class="tag-mark" aria-hidden="true">${isSelected ? "✓" : ""}</span>
+            <span>${escapeHtml(tag.name)}</span>
+            <span class="tag-count">${count}</span>
+          </button>`;
+      }).join("");
+    }
+
+    function applySearch(options) {
+      const historyMode = options?.historyMode || "push";
+      let conditions;
+      try {
+        conditions = buildSearchConditions();
+        conditions.keywordQuery = SearchQuery.parse(conditions.keyword);
+        activeKeywordQuery = conditions.keywordQuery;
+      } catch (error) {
+        activeKeywordQuery = { positiveGroups: [], excludedTerms: [] };
+        filtered = [];
+        activeIndex = 0;
+        $("resultCount").textContent = "语法错误";
+        $("results").innerHTML =
+          `<div class="empty">检索语法错误：${escapeHtml(error.message)}</div>`;
+        $("recordId").textContent = "";
+        $("detail").innerHTML =
+          '<div class="empty">请检查 OR、引号或排除词的写法。</div>';
+        renderTagPanel();
+        syncUrlState(historyMode);
+        return;
+      }
+      filtered = questions.filter((question) =>
+        matchesSearchConditions(question, conditions));
+      filtered = ResultSort.sort(
+        filtered,
+        conditions.sortMode,
+        activePositiveTerms(),
+        tagFields,
+        canonicalize
+      );
+      activeIndex = 0;
+      renderResults();
+      filtered.length ? renderDetail(filtered[0]) : renderEmpty();
+      renderTagPanel();
+      syncUrlState(historyMode);
+    }
+
+    function activePositiveTerms() {
+      return [...new Set(activeKeywordQuery.positiveGroups.flat())];
+    }
+
+    function matchingFieldLabels(question, terms) {
+      if (!terms.length) return [];
+      const fields = [];
+      if (SearchHighlight.hasMatch(question.question, terms, canonicalize)) {
+        fields.push("题干");
+      }
+      if (SearchHighlight.hasMatch(question.passage, terms, canonicalize)) {
+        fields.push("材料");
+      }
+      if (
+        tagFields.some((field) =>
+          (question[field] || []).some((name) =>
+            SearchHighlight.hasMatch(name, terms, canonicalize)))
+      ) {
+        fields.push("标签");
+      }
+      return fields;
+    }
+
+    function renderMatchFields(question, className = "") {
+      const labels = matchingFieldLabels(question, activePositiveTerms());
+      if (!labels.length) return "";
+      return `
+        <div class="match-fields ${className}">
+          <span class="match-fields-label">命中</span>
+          ${labels.map((label) =>
+            `<span class="match-field">${label}</span>`).join("")}
+        </div>`;
+    }
+
+    function renderPassageSnippet(question) {
+      const terms = activePositiveTerms();
+      if (!terms.length) return "";
+      const snippet = SearchHighlight.snippet(
+        question.passage,
+        terms,
+        canonicalize,
+        escapeHtml
+      );
+      return snippet
+        ? `<p class="result-snippet">材料：${snippet}</p>`
+        : "";
+    }
+
+    function renderResults() {
+      $("resultCount").textContent = `${filtered.length} 道`;
+      if (!filtered.length) {
+        $("results").innerHTML = '<div class="empty">没有找到符合条件的真题。<br>可以减少关键词或清空筛选条件。</div>';
+        return;
+      }
+      $("results").innerHTML = filtered.map((q, index) => `
+        <article class="result ${index === activeIndex ? "active" : ""}" data-index="${index}">
+          <button class="result-summary" type="button" data-index="${index}"
+            aria-label="查看 ${escapeHtml(q.year)} 年${escapeHtml(q.subject)}题目">
+            <span class="meta">${escapeHtml(q.year)}</span>
+            <span class="meta">${escapeHtml(q.subject)}</span>
+            <span class="meta">${escapeHtml(q.section)}</span>
+            <div class="result-copy">
+              <div class="question">${SearchHighlight.highlight(
+                q.question,
+                activePositiveTerms(),
+                canonicalize,
+                escapeHtml
+              )}</div>
+              ${renderMatchFields(q)}
+              ${renderPassageSnippet(q)}
+            </div>
+          </button>
+          <div class="result-tags">${renderQuestionTags(q)}</div>
+        </article>`).join("");
+    }
+
+    function section(label, value, highlight = false) {
+      if (!value) return "";
+      const content = highlight
+        ? SearchHighlight.highlight(
+          value,
+          activePositiveTerms(),
+          canonicalize,
+          escapeHtml
+        )
+        : escapeHtml(value);
+      return `<section><h3>${label}</h3><p>${content}</p></section>`;
+    }
+
+    function renderFilterTag(field, name) {
+      const isSelected = selectedTags[field].includes(name);
+      const typeLabel = tagFieldConfig[field].label;
+      const action = isSelected ? "取消" : "筛选";
+      return `
+        <button class="filter-tag ${isSelected ? "selected" : ""}"
+          type="button" data-filter-field="${field}"
+          data-filter-tag="${escapeHtml(name)}" aria-pressed="${isSelected}"
+          aria-label="${action}${typeLabel}标签：${escapeHtml(name)}"
+          title="${action}${typeLabel}标签">
+          ${SearchHighlight.highlight(
+            name,
+            activePositiveTerms(),
+            canonicalize,
+            escapeHtml
+          )}
+        </button>`;
+    }
+
+    function renderQuestionTags(question) {
+      return tagFields.flatMap((field) =>
+        (question[field] || []).map((name) => renderFilterTag(field, name))
+      ).join("");
+    }
+
+    function tagSection(label, field, values) {
+      if (!values?.length) return "";
+      return `
+        <section>
+          <h3>${label}</h3>
+          <div class="record-tags">
+            ${values.map((name) => renderFilterTag(field, name)).join("")}
+          </div>
+        </section>`;
+    }
+
+    function toggleRecordTag(field, name) {
+      if (!tagFieldConfig[field] || !name) return;
+      activeTagField = field;
+      $("tagSearch").value = "";
+      TagFilters.toggle(selectedTags[field], name);
+      applySearch();
+    }
+
+    function renderDetail(q) {
+      $("recordId").textContent = q.id || "";
+      const sources = (q.sources || []).map((s) => {
+        const file = s.file || "未知来源";
+        if (s.page != null) return `${file}，第 ${s.page} 页`;
+        if (Array.isArray(s.pages) && s.pages.length) {
+          return `${file}，第 ${s.pages.join("、")} 页`;
+        }
+        return file;
+      }).join("\n");
+      const verification = {
+        cross_checked: "双来源核对",
+        single_source: "单一来源"
+      }[q.verification] || q.verification || "未标注";
+      $("detail").innerHTML = `
+        <h2>${escapeHtml(q.year)} · ${escapeHtml(q.subject || "未知科目")}</h2>
+        <p class="subline">${escapeHtml(q.section || "未知题型")} · 第 ${escapeHtml(q.number ?? "—")} 题</p>
+        ${renderMatchFields(q, "detail-match")}
+        ${section("题目", q.question, true)}
+        ${section("材料", q.passage, true)}
+        ${tagSection("涉及哲学家", "philosophers", q.philosophers)}
+        ${tagSection("流派与思想传统", "schools", q.schools)}
+        ${tagSection("历史时期", "periods", q.periods)}
+        ${tagSection("问题与主题", "topics", q.topics)}
+        ${tagSection("涉及著作", "works", q.works)}
+        ${section("来源", sources)}
+        ${section("校对状态", verification)}`;
+      $("detail").scrollTop = 0;
+    }
+
+    function renderEmpty() {
+      $("recordId").textContent = "";
+      $("detail").innerHTML =
+        '<div class="empty"><strong>没有匹配结果</strong><br>换一个关键词，或按 Esc 清空全部条件。</div>';
+    }
+
+    $("results").addEventListener("click", (event) => {
+      const tag = event.target.closest("[data-filter-tag]");
+      if (tag) {
+        toggleRecordTag(tag.dataset.filterField, tag.dataset.filterTag);
+        return;
+      }
+      const summary = event.target.closest(".result-summary");
+      if (!summary) return;
+      activeIndex = Number(summary.dataset.index);
+      renderResults();
+      renderDetail(filtered[activeIndex]);
+    });
+    $("detail").addEventListener("click", (event) => {
+      const tag = event.target.closest("[data-filter-tag]");
+      if (!tag) return;
+      toggleRecordTag(tag.dataset.filterField, tag.dataset.filterTag);
+    });
+    $("tagTabs").addEventListener("click", (event) => {
+      const tab = event.target.closest("[data-field]");
+      if (!tab || !tagFieldConfig[tab.dataset.field]) return;
+      activeTagField = tab.dataset.field;
+      $("tagSearch").value = "";
+      renderTagPanel();
+    });
+    $("tagList").addEventListener("click", (event) => {
+      const option = event.target.closest("[data-tag]");
+      if (!option) return;
+      const values = selectedTags[option.dataset.field];
+      TagFilters.toggle(values, option.dataset.tag);
+      applySearch();
+    });
+    $("tagMode").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-mode]");
+      if (!button) return;
+      tagModes[activeTagField] = button.dataset.mode;
+      applySearch();
+    });
+    $("clearTags").addEventListener("click", () => {
+      tagFields.forEach((field) => selectedTags[field].splice(0));
+      applySearch();
+    });
+    $("tagSearch").addEventListener("input", renderTagPanel);
+    $("search").addEventListener("click", applySearch);
+    $("subject").addEventListener("change", applySearch);
+    $("sectionFilter").addEventListener("change", applySearch);
+    $("verificationFilter").addEventListener("change", applySearch);
+    $("sortMode").addEventListener("change", applySearch);
+    $("yearFrom").addEventListener("change", () => {
+      const from = Number($("yearFrom").value);
+      const to = Number($("yearTo").value);
+      if (from && to && from > to) $("yearTo").value = String(from);
+      applySearch();
+    });
+    $("yearTo").addEventListener("change", () => {
+      const from = Number($("yearFrom").value);
+      const to = Number($("yearTo").value);
+      if (from && to && to < from) $("yearFrom").value = String(to);
+      applySearch();
+    });
+    $("resetStructured").addEventListener("click", () => {
+      $("yearFrom").value = "";
+      $("yearTo").value = "";
+      $("subject").value = "";
+      $("sectionFilter").value = "";
+      $("verificationFilter").value = "";
+      $("sortMode").value = "relevance";
+      applySearch();
+    });
+    $("keyword").addEventListener("keydown", (event) => {
+      if (event.key === "Enter") applySearch();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        $("keyword").value = "";
+        $("yearFrom").value = "";
+        $("yearTo").value = "";
+        $("subject").value = "";
+        $("sectionFilter").value = "";
+        $("verificationFilter").value = "";
+        $("sortMode").value = "relevance";
+        $("tagSearch").value = "";
+        tagFields.forEach((field) => selectedTags[field].splice(0));
+        applySearch();
+        $("keyword").focus();
+      }
+    });
+    window.addEventListener("popstate", () => {
+      if (!urlStateReady) return;
+      restoreUrlState(UrlState.parse(window.location.search));
+      applySearch({ historyMode: "none" });
+    });
+
+    Promise.all([
+      fetch("../data/questions.json"),
+      fetch("../data/tag_taxonomy.json")
+    ])
+      .then(async ([questionsResponse, taxonomyResponse]) => {
+        if (!questionsResponse.ok) throw new Error(`题库 HTTP ${questionsResponse.status}`);
+        if (!taxonomyResponse.ok) throw new Error(`标签表 HTTP ${taxonomyResponse.status}`);
+        return Promise.all([questionsResponse.json(), taxonomyResponse.json()]);
+      })
+      .then(([data, taxonomy]) => {
+        questions = data;
+        aliasMap = new Map(
+          (taxonomy.tags || []).flatMap((tag) =>
+            (tag.aliases || []).map((alias) => [normalize(alias), tag.name]))
+        );
+        prepareTagCatalog(taxonomy);
+        $("total").textContent = `${questions.length} 道题`;
+        populateFilters();
+        restoreUrlState(UrlState.parse(window.location.search));
+        urlStateReady = true;
+        applySearch({ historyMode: "replace" });
+        $("keyword").focus();
+      })
+      .catch((error) => {
+        $("total").textContent = "载入失败";
+        $("results").innerHTML =
+          `<div class="empty">无法读取真题数据：${escapeHtml(error.message)}<br>请通过 python src/search_web.py 启动。</div>`;
+      });
+  </script>
+</body>
+</html>
