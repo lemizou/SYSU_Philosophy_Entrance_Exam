@@ -91,15 +91,15 @@ python src/search_web.py
 - [x] 数据文件使用相对路径，可适配 GitHub Pages 的项目子路径
 - [x] 将当前完整项目提交并推送到 GitHub
 - [x] 将检索页面设置为仓库网站入口，使项目根地址可以直接打开
-- [ ] 在仓库设置中启用 GitHub Pages
-- [ ] 确认公开网址可以正常访问
+- [x] 在仓库设置中启用 GitHub Pages
+- [x] 确认公开网址可以正常访问
 - [ ] 在电脑浏览器中测试公开网址的搜索、筛选和链接恢复
 - [ ] 在手机浏览器中测试布局和主要检索流程
-- [ ] 在 `README.md` 中添加公开网站地址和在线使用说明
+- [x] 在 `README.md` 中添加公开网站地址和在线使用说明
 
-截至本次盘点，预期公开地址
-`https://lemizou.github.io/SYSU_Philosophy_Entrance_Exam/` 仍返回 404，
-所以上述发布与公开网址验收任务保持未完成。
+公开地址已经启用：
+`https://lemizou.github.io/SYSU_Philosophy_Entrance_Exam/`。项目根入口、
+检索页面和题库 JSON 均已确认可以正常访问。
 
 ## 后续维护
 

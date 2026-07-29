@@ -2,6 +2,14 @@
 ## 项目介绍
 本项目用于整理和检索中山大学哲学考研相关资料。
 
+## 在线使用
+
+公开检索网站：
+[https://lemizou.github.io/SYSU_Philosophy_Entrance_Exam/](https://lemizou.github.io/SYSU_Philosophy_Entrance_Exam/)
+
+打开网址后可以直接按关键词、年份、科目、题型和标签检索。检索条件会保存在
+网址中，复制当前链接即可分享同一组结果。
+
 目标：
 - 整理历年考试真题
 - 建立知识分类体系
