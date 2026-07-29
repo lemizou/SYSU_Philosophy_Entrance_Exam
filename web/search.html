@@ -141,7 +141,10 @@
       font-weight: 700;
       cursor: pointer;
     }
-    button:hover { background: #aa352a; }
+    #search:hover:not(:disabled) {
+      background: #e8ebef;
+      color: #181b20;
+    }
     .workspace {
       display: grid;
       grid-template-columns: minmax(480px, 1.35fr) minmax(340px, .85fr);
@@ -195,7 +198,13 @@
       font-weight: 600;
     }
     .clear-tags:hover:not(:disabled) { background: rgba(255, 255, 255, .1); }
-    .clear-tags:disabled { opacity: .38; cursor: default; }
+    .clear-tags:disabled,
+    .clear-tags:disabled:hover,
+    .clear-tags:disabled:active {
+      background: transparent;
+      opacity: .38;
+      cursor: default;
+    }
     .tag-tabs {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -242,32 +251,6 @@
       font-weight: 700;
     }
     .tag-search input { padding: 8px 8px; font-size: 12px; }
-    .tag-mode-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 9px;
-      color: var(--muted);
-      font-size: 11px;
-    }
-    .tag-mode {
-      display: inline-flex;
-      border: 1px solid var(--line);
-    }
-    .tag-mode button {
-      min-height: 26px;
-      padding: 0 9px;
-      background: white;
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 600;
-    }
-    .tag-mode button + button { border-left: 1px solid var(--line); }
-    .tag-mode button:hover { background: var(--pale); color: var(--ink); }
-    .tag-mode button.active {
-      background: var(--ink);
-      color: white;
-    }
     .tag-list {
       flex: 1;
       min-height: 0;
@@ -358,7 +341,7 @@
       font-weight: 400;
     }
     .result-summary:hover { background: #f7f9fc; }
-    .result.active .result-summary:hover { background: rgba(255, 255, 255, .18); }
+    .result.active .result-summary:hover { background: transparent; }
     .result-tags {
       display: flex;
       flex-wrap: wrap;
@@ -510,6 +493,8 @@
       @keyframes arrive { from { opacity: 0; transform: translateY(6px); } }
     }
   </style>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="editorial.css">
 </head>
 <body>
   <header>
@@ -517,7 +502,7 @@
       <h1>中大哲学 · 历年真题</h1>
       <span class="count-badge" id="total">载入中</span>
     </div>
-    <p>在题干、材料和分类标签中检索，按年份与科目缩小范围。</p>
+    <p>关键词语法：空格表示 AND，OR 表示任选，引号用于精确匹配短语，- 后接关键词表示排除</p>
   </header>
 
   <main>
@@ -527,7 +512,7 @@
         <input id="keyword" autocomplete="off" placeholder="例如：康德 先验、康德 OR 黑格尔、-费希特">
       </div>
       <select id="subject" aria-label="按科目筛选"><option value="">全部科目</option></select>
-      <button id="search" type="button">查找真题</button>
+      <button id="search" type="button">Search</button>
     </div>
     <div class="filter-strip" aria-label="结构化筛选和排序">
       <div class="filter-strip-title">检索条件</div>
@@ -542,14 +527,6 @@
       <label class="filter-control">
         <span>题型</span>
         <select id="sectionFilter"><option value="">全部题型</option></select>
-      </label>
-      <label class="filter-control">
-        <span>校对状态</span>
-        <select id="verificationFilter">
-          <option value="">全部状态</option>
-          <option value="cross_checked">双来源核对</option>
-          <option value="single_source">单一来源</option>
-        </select>
       </label>
       <label class="filter-control">
         <span>结果排序</span>
@@ -576,36 +553,45 @@
             <label for="tagSearch">标签</label>
             <input id="tagSearch" autocomplete="off" placeholder="筛选当前分类">
           </div>
-          <div class="tag-mode-row">
-            <span>多选关系</span>
-            <div class="tag-mode" id="tagMode" aria-label="标签多选关系">
-              <button type="button" data-mode="any">任一</button>
-              <button type="button" data-mode="all">全部</button>
-            </div>
-          </div>
         </div>
         <div class="tag-list" id="tagList"></div>
       </aside>
 
-      <div class="workspace">
+      <div class="workspace" data-mobile-pane="results">
+        <nav class="mobile-pane-switch" aria-label="移动端内容切换">
+          <button type="button" data-pane-button="results" aria-pressed="true">
+            检索结果
+          </button>
+          <button type="button" data-pane-button="detail" aria-pressed="false">
+            题目详情
+          </button>
+        </nav>
         <section class="results-panel">
           <div class="panel-head">检索结果 <span id="resultCount"></span></div>
           <div class="results" id="results"></div>
         </section>
+        <div class="pane-resizer" id="paneResizer" role="separator"
+          aria-label="调整检索结果和试题详情的宽度"
+          aria-orientation="vertical" aria-valuemin="32" aria-valuemax="68"
+          aria-valuenow="52" tabindex="0"></div>
         <aside class="detail-panel">
-          <div class="panel-head">试题详情 <span id="recordId"></span></div>
+          <div class="panel-head">试题详情</div>
           <div class="detail" id="detail"></div>
         </aside>
       </div>
     </div>
     <footer>
-      <span>筛选条件会写入网址，可复制当前链接</span>
-      <span>空格 AND · OR 任选 · “短语” · -排除 · Esc 清空</span>
+      <span>项目来源</span>
+      <a href="https://github.com/lemizou/SYSU_Philosophy_Entrance_Exam"
+        target="_blank" rel="noopener noreferrer">
+        GitHub · lemizou/SYSU_Philosophy_Entrance_Exam
+      </a>
     </footer>
   </main>
 
   <script src="search_query.js"></script>
   <script src="tag_filters.js"></script>
+  <script src="search_engine.js"></script>
   <script src="search_highlight.js"></script>
   <script src="result_sort.js"></script>
   <script src="url_state.js"></script>
@@ -622,14 +608,12 @@
     let activeKeywordQuery = { positiveGroups: [], excludedTerms: [] };
     let urlStateReady = false;
 
-    const normalize = (value) =>
-      String(value ?? "").toLocaleLowerCase().replace(/\s+/g, "");
+    const normalize = SearchEngine.normalize;
     const escapeHtml = (value) =>
       String(value ?? "").replace(/[&<>"']/g, (c) =>
         ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[c]);
-    const tagFields = ["philosophers", "schools", "periods", "topics", "works"];
+    const tagFields = SearchEngine.TAG_FIELDS;
     const selectedTags = Object.fromEntries(tagFields.map((field) => [field, []]));
-    const tagModes = Object.fromEntries(tagFields.map((field) => [field, "any"]));
     const tagFieldConfig = {
       philosophers: { label: "人物", type: "philosopher" },
       schools: { label: "流派", type: "school" },
@@ -646,8 +630,6 @@
       const normalized = normalize(value);
       return normalize(aliasMap.get(normalized) || value);
     };
-    const normalizeSubject = (value) =>
-      value === "西方哲学史" ? "外国哲学史" : value;
 
     function buildSearchConditions() {
       const yearFrom = Number($("yearFrom").value) || null;
@@ -658,7 +640,6 @@
         tags: Object.fromEntries(
           tagFields.map((field) => [field, [...selectedTags[field]]])
         ),
-        tagModes: { ...tagModes },
         years: yearFrom === null && yearTo === null
           ? []
           : availableYears.filter((year) =>
@@ -666,9 +647,6 @@
             && (yearTo === null || year <= yearTo)),
         subjects: subject ? [subject] : [],
         sections: $("sectionFilter").value ? [$("sectionFilter").value] : [],
-        verification: $("verificationFilter").value
-          ? [$("verificationFilter").value]
-          : [],
         sortMode: $("sortMode").value
       };
     }
@@ -680,12 +658,10 @@
         yearFrom: $("yearFrom").value,
         yearTo: $("yearTo").value,
         section: $("sectionFilter").value,
-        verification: $("verificationFilter").value,
         sortMode: $("sortMode").value,
         tags: Object.fromEntries(
           tagFields.map((field) => [field, [...selectedTags[field]]])
-        ),
-        tagModes: { ...tagModes }
+        )
       };
     }
 
@@ -707,10 +683,6 @@
       $("sectionFilter").value = selectHasValue("sectionFilter", state.section)
         ? state.section
         : "";
-      $("verificationFilter").value =
-        selectHasValue("verificationFilter", state.verification)
-          ? state.verification
-          : "";
       $("sortMode").value = ResultSort.MODES.includes(state.sortMode)
         ? state.sortMode
         : "relevance";
@@ -736,7 +708,6 @@
           selectedTags[field].length,
           ...new Set(restoredTags)
         );
-        tagModes[field] = state.tagModes[field] === "all" ? "all" : "any";
       }
       activeTagField =
         tagFields.find((field) => selectedTags[field].length)
@@ -757,52 +728,8 @@
       }
     }
 
-    function matchesTagFilter(question, field, requested, mode) {
-      return TagFilters.matches(
-        question[field] || [],
-        requested,
-        mode,
-        canonicalize
-      );
-    }
-
     function matchesSearchConditions(question, conditions) {
-      if (conditions.keywordQuery) {
-        const haystack = [question.question, question.passage, ...tagsFor(question)]
-          .map(normalize).join("|");
-        const contains = (term) => haystack.includes(canonicalize(term));
-        if (!SearchQuery.matches(conditions.keywordQuery, contains)) return false;
-      }
-      if (conditions.years.length && !conditions.years.includes(question.year)) {
-        return false;
-      }
-      if (
-        conditions.subjects.length
-        && !conditions.subjects.map(normalizeSubject)
-          .includes(normalizeSubject(question.subject))
-      ) {
-        return false;
-      }
-      if (
-        conditions.sections.length
-        && !conditions.sections.includes(question.section)
-      ) {
-        return false;
-      }
-      if (
-        conditions.verification.length
-        && !conditions.verification.includes(question.verification)
-      ) {
-        return false;
-      }
-      return tagFields.every((field) =>
-        matchesTagFilter(
-          question,
-          field,
-          conditions.tags[field] || [],
-          conditions.tagModes[field] || "any"
-        )
-      );
+      return SearchEngine.matches(question, conditions, canonicalize);
     }
 
     function populateFilters() {
@@ -866,12 +793,6 @@
           </button>`;
       }).join("");
 
-      $("tagMode").querySelectorAll("[data-mode]").forEach((button) => {
-        const active = button.dataset.mode === tagModes[activeTagField];
-        button.classList.toggle("active", active);
-        button.setAttribute("aria-pressed", String(active));
-      });
-
       const needle = normalize($("tagSearch").value);
       const selected = new Set(selectedTags[activeTagField]);
       const visibleTags = tagCatalog
@@ -928,7 +849,6 @@
         $("resultCount").textContent = "语法错误";
         $("results").innerHTML =
           `<div class="empty">检索语法错误：${escapeHtml(error.message)}</div>`;
-        $("recordId").textContent = "";
         $("detail").innerHTML =
           '<div class="empty">请检查 OR、引号或排除词的写法。</div>';
         renderTagPanel();
@@ -948,6 +868,7 @@
       renderResults();
       filtered.length ? renderDetail(filtered[0]) : renderEmpty();
       renderTagPanel();
+      setMobilePane("results");
       syncUrlState(historyMode);
     }
 
@@ -1027,6 +948,22 @@
         </article>`).join("");
     }
 
+    function setActiveResult(nextIndex) {
+      const results = $("results");
+      const nextResult = results.querySelector(
+        `.result[data-index="${nextIndex}"]`
+      );
+      if (!nextResult) return false;
+
+      const previousResult = results.querySelector(".result.active");
+      if (previousResult !== nextResult) {
+        previousResult?.classList.remove("active");
+        nextResult.classList.add("active");
+      }
+      activeIndex = nextIndex;
+      return true;
+    }
+
     function section(label, value, highlight = false) {
       if (!value) return "";
       const content = highlight
@@ -1085,40 +1022,95 @@
     }
 
     function renderDetail(q) {
-      $("recordId").textContent = q.id || "";
-      const sources = (q.sources || []).map((s) => {
-        const file = s.file || "未知来源";
-        if (s.page != null) return `${file}，第 ${s.page} 页`;
-        if (Array.isArray(s.pages) && s.pages.length) {
-          return `${file}，第 ${s.pages.join("、")} 页`;
-        }
-        return file;
-      }).join("\n");
-      const verification = {
-        cross_checked: "双来源核对",
-        single_source: "单一来源"
-      }[q.verification] || q.verification || "未标注";
       $("detail").innerHTML = `
         <h2>${escapeHtml(q.year)} · ${escapeHtml(q.subject || "未知科目")}</h2>
         <p class="subline">${escapeHtml(q.section || "未知题型")} · 第 ${escapeHtml(q.number ?? "—")} 题</p>
         ${renderMatchFields(q, "detail-match")}
         ${section("题目", q.question, true)}
         ${section("材料", q.passage, true)}
-        ${tagSection("涉及哲学家", "philosophers", q.philosophers)}
+        ${tagSection("涉及人物", "philosophers", q.philosophers)}
         ${tagSection("流派与思想传统", "schools", q.schools)}
         ${tagSection("历史时期", "periods", q.periods)}
         ${tagSection("问题与主题", "topics", q.topics)}
-        ${tagSection("涉及著作", "works", q.works)}
-        ${section("来源", sources)}
-        ${section("校对状态", verification)}`;
+        ${tagSection("涉及著作", "works", q.works)}`;
       $("detail").scrollTop = 0;
     }
 
     function renderEmpty() {
-      $("recordId").textContent = "";
       $("detail").innerHTML =
         '<div class="empty"><strong>没有匹配结果</strong><br>换一个关键词，或按 Esc 清空全部条件。</div>';
     }
+
+    function setMobilePane(pane) {
+      const workspace = document.querySelector(".workspace");
+      const nextPane = pane === "detail" ? "detail" : "results";
+      workspace.dataset.mobilePane = nextPane;
+      workspace.querySelectorAll("[data-pane-button]").forEach((button) => {
+        button.setAttribute(
+          "aria-pressed",
+          String(button.dataset.paneButton === nextPane)
+        );
+      });
+    }
+
+    const paneResizer = $("paneResizer");
+    const workspace = document.querySelector(".workspace");
+    const defaultPaneSplit = 52;
+    const minPaneSplit = 32;
+    const maxPaneSplit = 68;
+    let paneSplit = defaultPaneSplit;
+
+    function setPaneSplit(percent) {
+      paneSplit = Math.min(maxPaneSplit, Math.max(minPaneSplit, percent));
+      workspace.style.setProperty("--results-share", `${paneSplit}%`);
+      paneResizer.setAttribute("aria-valuenow", String(Math.round(paneSplit)));
+    }
+
+    function paneSplitFromPointer(clientX) {
+      const bounds = workspace.getBoundingClientRect();
+      if (!bounds.width) return paneSplit;
+      return ((clientX - bounds.left) / bounds.width) * 100;
+    }
+
+    function finishPaneResize(event) {
+      if (!paneResizer.hasPointerCapture(event.pointerId)) return;
+      paneResizer.releasePointerCapture(event.pointerId);
+      workspace.classList.remove("is-resizing");
+    }
+
+    paneResizer.addEventListener("pointerdown", (event) => {
+      if (window.matchMedia("(max-width: 720px)").matches) return;
+      event.preventDefault();
+      paneResizer.setPointerCapture(event.pointerId);
+      workspace.classList.add("is-resizing");
+      setPaneSplit(paneSplitFromPointer(event.clientX));
+    });
+
+    paneResizer.addEventListener("pointermove", (event) => {
+      if (!paneResizer.hasPointerCapture(event.pointerId)) return;
+      setPaneSplit(paneSplitFromPointer(event.clientX));
+    });
+
+    paneResizer.addEventListener("pointerup", finishPaneResize);
+    paneResizer.addEventListener("pointercancel", finishPaneResize);
+    paneResizer.addEventListener("dblclick", () => setPaneSplit(defaultPaneSplit));
+    paneResizer.addEventListener("keydown", (event) => {
+      const adjustments = {
+        ArrowLeft: -2,
+        ArrowRight: 2,
+        Home: minPaneSplit - paneSplit,
+        End: maxPaneSplit - paneSplit,
+      };
+      if (!(event.key in adjustments)) return;
+      event.preventDefault();
+      setPaneSplit(paneSplit + adjustments[event.key]);
+    });
+
+    document.querySelector(".mobile-pane-switch").addEventListener("click", (event) => {
+      const button = event.target.closest("[data-pane-button]");
+      if (!button) return;
+      setMobilePane(button.dataset.paneButton);
+    });
 
     $("results").addEventListener("click", (event) => {
       const tag = event.target.closest("[data-filter-tag]");
@@ -1128,9 +1120,10 @@
       }
       const summary = event.target.closest(".result-summary");
       if (!summary) return;
-      activeIndex = Number(summary.dataset.index);
-      renderResults();
+      const nextIndex = Number(summary.dataset.index);
+      if (!setActiveResult(nextIndex)) return;
       renderDetail(filtered[activeIndex]);
+      setMobilePane("detail");
     });
     $("detail").addEventListener("click", (event) => {
       const tag = event.target.closest("[data-filter-tag]");
@@ -1151,12 +1144,6 @@
       TagFilters.toggle(values, option.dataset.tag);
       applySearch();
     });
-    $("tagMode").addEventListener("click", (event) => {
-      const button = event.target.closest("[data-mode]");
-      if (!button) return;
-      tagModes[activeTagField] = button.dataset.mode;
-      applySearch();
-    });
     $("clearTags").addEventListener("click", () => {
       tagFields.forEach((field) => selectedTags[field].splice(0));
       applySearch();
@@ -1165,7 +1152,6 @@
     $("search").addEventListener("click", applySearch);
     $("subject").addEventListener("change", applySearch);
     $("sectionFilter").addEventListener("change", applySearch);
-    $("verificationFilter").addEventListener("change", applySearch);
     $("sortMode").addEventListener("change", applySearch);
     $("yearFrom").addEventListener("change", () => {
       const from = Number($("yearFrom").value);
@@ -1184,7 +1170,6 @@
       $("yearTo").value = "";
       $("subject").value = "";
       $("sectionFilter").value = "";
-      $("verificationFilter").value = "";
       $("sortMode").value = "relevance";
       applySearch();
     });
@@ -1198,7 +1183,6 @@
         $("yearTo").value = "";
         $("subject").value = "";
         $("sectionFilter").value = "";
-        $("verificationFilter").value = "";
         $("sortMode").value = "relevance";
         $("tagSearch").value = "";
         tagFields.forEach((field) => selectedTags[field].splice(0));
@@ -1227,6 +1211,11 @@
           (taxonomy.tags || []).flatMap((tag) =>
             (tag.aliases || []).map((alias) => [normalize(alias), tag.name]))
         );
+        window.__searchAppTestApi = {
+          get loadedCount() { return questions.length; },
+          get resultIds() { return filtered.map((question) => question.id); },
+          get state() { return captureUrlState(); }
+        };
         prepareTagCatalog(taxonomy);
         $("total").textContent = `${questions.length} 道题`;
         populateFilters();

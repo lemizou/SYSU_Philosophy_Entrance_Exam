@@ -115,6 +115,35 @@ class DataIntegrityTest(unittest.TestCase):
                     self.assertTrue(all(isinstance(value, str) for value in values))
                     self.assertTrue(all(value.strip() for value in values))
 
+    def test_work_tags_have_meaningful_coverage(self) -> None:
+        registered_works = {
+            tag["name"]
+            for tag in self.taxonomy["tags"]
+            if tag.get("type") == "work"
+        }
+        tagged_questions = [
+            question for question in self.questions if question["works"]
+        ]
+        explicitly_titled_questions = [
+            question
+            for question in self.questions
+            if "《"
+            in "\n".join(
+                str(question.get(field, ""))
+                for field in ("question", "passage", "section_instruction")
+            )
+        ]
+
+        self.assertGreaterEqual(len(registered_works), 60)
+        self.assertGreaterEqual(len(tagged_questions), 100)
+        used_works = {
+            work for question in self.questions for work in question["works"]
+        }
+        self.assertEqual(registered_works, used_works)
+        self.assertTrue(
+            all(question["works"] for question in explicitly_titled_questions)
+        )
+
     def test_sources_have_valid_locations(self) -> None:
         for question in self.questions:
             with self.subTest(question_id=question["id"]):

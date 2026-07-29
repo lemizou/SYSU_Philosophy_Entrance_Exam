@@ -14,13 +14,11 @@
     return counts;
   }
 
-  function matches(availableValues, requestedValues, mode, canonicalize) {
+  function matches(availableValues, requestedValues, canonicalize) {
     if (!requestedValues.length) return true;
     const available = new Set(availableValues.map(canonicalize));
     const requested = requestedValues.map(canonicalize);
-    return mode === "all"
-      ? requested.every((value) => available.has(value))
-      : requested.some((value) => available.has(value));
+    return requested.some((value) => available.has(value));
   }
 
   function toggle(values, value) {

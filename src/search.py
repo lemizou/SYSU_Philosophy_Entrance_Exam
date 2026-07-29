@@ -14,7 +14,6 @@ from typing import Any
 QUESTIONS_PATH = Path(__file__).resolve().parents[1] / "data" / "questions.json"
 TAXONOMY_PATH = Path(__file__).resolve().parents[1] / "data" / "tag_taxonomy.json"
 TAG_FIELDS = ("philosophers", "schools", "periods", "topics", "works")
-TAG_MODES = ("any", "all")
 SORT_MODES = ("relevance", "year_desc", "year_asc")
 
 
@@ -34,13 +33,11 @@ class KeywordQuery:
 class SearchConditions:
     """所有检索入口共享的结构化条件。
 
-    不同字段之间始终使用 AND；同一普通筛选字段内使用 OR；每一类标签可用
-    ``tag_modes`` 单独选择 any（任一）或 all（全部）。
+    不同字段之间始终使用 AND；同一筛选字段内使用 OR。
     """
 
     keyword: str | None = None
     tags: dict[str, tuple[str, ...]] = field(default_factory=dict)
-    tag_modes: dict[str, str] = field(default_factory=dict)
     years: tuple[int, ...] = ()
     subjects: tuple[str, ...] = ()
     sections: tuple[str, ...] = ()
@@ -50,19 +47,6 @@ class SearchConditions:
         unknown_fields = set(self.tags) - set(TAG_FIELDS)
         if unknown_fields:
             raise ValueError(f"未知标签字段：{sorted(unknown_fields)}")
-        unknown_mode_fields = set(self.tag_modes) - set(TAG_FIELDS)
-        if unknown_mode_fields:
-            raise ValueError(f"未知标签模式字段：{sorted(unknown_mode_fields)}")
-        invalid_modes = {
-            field_name: mode
-            for field_name, mode in self.tag_modes.items()
-            if mode not in TAG_MODES
-        }
-        if invalid_modes:
-            raise ValueError(f"标签模式只能是 any 或 all：{invalid_modes}")
-
-    def mode_for(self, field_name: str) -> str:
-        return self.tag_modes.get(field_name, "any")
 
     def is_empty(self) -> bool:
         return not any(
@@ -213,7 +197,6 @@ def matches_philosopher(
         question,
         "philosophers",
         tuple(names),
-        "all",
         aliases,
     )
 
@@ -256,15 +239,12 @@ def matches_tag_filter(
     question: dict[str, Any],
     field_name: str,
     requested: tuple[str, ...],
-    mode: str,
     aliases: dict[str, str] | None = None,
 ) -> bool:
     if not requested:
         return True
     available = {normalize(value) for value in question.get(field_name, [])}
     selected = {canonicalize(value, aliases) for value in requested}
-    if mode == "all":
-        return selected <= available
     return bool(selected & available)
 
 
@@ -302,7 +282,6 @@ def matches_conditions(
             question,
             field_name,
             requested,
-            conditions.mode_for(field_name),
             aliases,
         )
         for field_name, requested in conditions.tags.items()
@@ -408,7 +387,6 @@ def search_questions(
         conditions = SearchConditions(
             keyword=keyword,
             tags={"philosophers": tuple(philosophers or ())},
-            tag_modes={"philosophers": "all"},
             years=(year,) if year is not None else (),
             subjects=(subject,) if subject else (),
         )
@@ -452,7 +430,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--philosopher",
         action="append",
         default=[],
-        help="按哲学家筛选；可重复使用以要求同时匹配多位哲学家",
+        help="按哲学家筛选；可重复使用以匹配任一哲学家",
     )
     parser.add_argument("-y", "--year", type=int, help="按年份筛选")
     parser.add_argument("--year-from", type=int, help="筛选起始年份（含）")
@@ -486,6 +464,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--list-philosophers",
         action="store_true",
         help="列出哲学家索引及对应题目数",
+    )
+    parser.add_argument(
+        "--ids-only",
+        action="store_true",
+        help="每行仅输出一个匹配题目的 ID，供自动测试和脚本调用",
     )
     return parser
 
@@ -539,7 +522,6 @@ def main() -> int:
     conditions = SearchConditions(
         keyword=args.keyword,
         tags={"philosophers": tuple(args.philosopher)},
-        tag_modes={"philosophers": "all"},
         years=years,
         subjects=(args.subject,) if args.subject else (),
         sections=tuple(args.section),
@@ -562,6 +544,11 @@ def main() -> int:
     if not results:
         print("没有找到符合条件的真题。")
         return 1
+
+    if args.ids_only:
+        for question in results:
+            print(question["id"])
+        return 0
 
     for question in results:
         print_question(question)

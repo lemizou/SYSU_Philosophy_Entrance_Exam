@@ -18,14 +18,14 @@ assert.equal(counts.get("topics\u0000认识论"), 2);
 
 const normalize = (value) => String(value).toLocaleLowerCase();
 assert.equal(
-  TagFilters.matches(["康德", "黑格尔"], ["康德", "朱熹"], "any", normalize),
+  TagFilters.matches(["康德", "黑格尔"], ["康德", "朱熹"], normalize),
   true
 );
 assert.equal(
-  TagFilters.matches(["康德", "黑格尔"], ["康德", "朱熹"], "all", normalize),
+  TagFilters.matches(["康德", "黑格尔"], ["朱熹", "庄子"], normalize),
   false
 );
-assert.equal(TagFilters.matches([], [], "all", normalize), true);
+assert.equal(TagFilters.matches([], [], normalize), true);
 
 const selected = [];
 TagFilters.toggle(selected, "康德");

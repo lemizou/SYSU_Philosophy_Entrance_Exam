@@ -494,6 +494,493 @@
       "name": "道德哲学",
       "type": "topic",
       "aliases": []
+    },
+    {
+      "name": "《上帝之城》",
+      "type": "work",
+      "aliases": [
+        "上帝之城"
+      ]
+    },
+    {
+      "name": "《中国哲学的方法论问题》",
+      "type": "work",
+      "aliases": [
+        "中国哲学的方法论问题"
+      ]
+    },
+    {
+      "name": "《中庸》",
+      "type": "work",
+      "aliases": [
+        "中庸"
+      ]
+    },
+    {
+      "name": "《二程遗书》",
+      "type": "work",
+      "aliases": [
+        "二程遗书"
+      ]
+    },
+    {
+      "name": "《人类理智研究》",
+      "type": "work",
+      "aliases": [
+        "人类理智研究"
+      ]
+    },
+    {
+      "name": "《人类理解论》",
+      "type": "work",
+      "aliases": [
+        "人类理解论"
+      ]
+    },
+    {
+      "name": "《人类知识原理》",
+      "type": "work",
+      "aliases": [
+        "人类知识原理"
+      ]
+    },
+    {
+      "name": "《传习录》",
+      "type": "work",
+      "aliases": [
+        "传习录"
+      ]
+    },
+    {
+      "name": "《作为意志和表象的世界》",
+      "type": "work",
+      "aliases": [
+        "作为意志和表象的世界"
+      ]
+    },
+    {
+      "name": "《俱分进化论》",
+      "type": "work",
+      "aliases": [
+        "俱分进化论"
+      ]
+    },
+    {
+      "name": "《偶像的黄昏》",
+      "type": "work",
+      "aliases": [
+        "偶像的黄昏"
+      ]
+    },
+    {
+      "name": "《全部知识学的基础》",
+      "type": "work",
+      "aliases": [
+        "全部知识学的基础"
+      ]
+    },
+    {
+      "name": "《公孙龙子》",
+      "type": "work",
+      "aliases": [
+        "公孙龙子"
+      ]
+    },
+    {
+      "name": "《利维坦》",
+      "type": "work",
+      "aliases": [
+        "利维坦"
+      ]
+    },
+    {
+      "name": "《单子论》",
+      "type": "work",
+      "aliases": [
+        "单子论"
+      ]
+    },
+    {
+      "name": "《原性》",
+      "type": "work",
+      "aliases": [
+        "原性"
+      ]
+    },
+    {
+      "name": "《周易外传》",
+      "type": "work",
+      "aliases": [
+        "周易外传"
+      ]
+    },
+    {
+      "name": "《周易略例》",
+      "type": "work",
+      "aliases": [
+        "周易略例"
+      ]
+    },
+    {
+      "name": "《哲学史讲演录》",
+      "type": "work",
+      "aliases": [
+        "哲学史讲演录"
+      ]
+    },
+    {
+      "name": "《坛经》",
+      "type": "work",
+      "aliases": [
+        "坛经"
+      ]
+    },
+    {
+      "name": "《墨子》",
+      "type": "work",
+      "aliases": [
+        "《墨子·大取》",
+        "《小取》"
+      ]
+    },
+    {
+      "name": "《大乘起信论》",
+      "type": "work",
+      "aliases": [
+        "大乘起信论"
+      ]
+    },
+    {
+      "name": "《大学》",
+      "type": "work",
+      "aliases": [
+        "大学"
+      ]
+    },
+    {
+      "name": "《天演论》",
+      "type": "work",
+      "aliases": [
+        "天演论"
+      ]
+    },
+    {
+      "name": "《孔子改制考》",
+      "type": "work",
+      "aliases": [
+        "孔子改制考"
+      ]
+    },
+    {
+      "name": "《孟子》",
+      "type": "work",
+      "aliases": [
+        "《孟子·公孙丑上》",
+        "《孟子·离娄下》"
+      ]
+    },
+    {
+      "name": "《孟子字义疏证》",
+      "type": "work",
+      "aliases": [
+        "孟子字义疏证"
+      ]
+    },
+    {
+      "name": "《尚书》",
+      "type": "work",
+      "aliases": [
+        "《书》",
+        "尚书"
+      ]
+    },
+    {
+      "name": "《巴门尼德篇》",
+      "type": "work",
+      "aliases": [
+        "巴门尼德篇"
+      ]
+    },
+    {
+      "name": "《庄子》",
+      "type": "work",
+      "aliases": [
+        "《庄子·秋水》",
+        "《庄子·齐物论》"
+      ]
+    },
+    {
+      "name": "《庄子注》",
+      "type": "work",
+      "aliases": [
+        "庄子注"
+      ]
+    },
+    {
+      "name": "《形而上学》",
+      "type": "work",
+      "aliases": [
+        "形而上学"
+      ]
+    },
+    {
+      "name": "《文史通义》",
+      "type": "work",
+      "aliases": [
+        "文史通义"
+      ]
+    },
+    {
+      "name": "《新学伪经考》",
+      "type": "work",
+      "aliases": [
+        "新学伪经考"
+      ]
+    },
+    {
+      "name": "《新工具》",
+      "type": "work",
+      "aliases": [
+        "新工具"
+      ]
+    },
+    {
+      "name": "《明儒学案》",
+      "type": "work",
+      "aliases": [
+        "明儒学案"
+      ]
+    },
+    {
+      "name": "《易传》",
+      "type": "work",
+      "aliases": [
+        "易传"
+      ]
+    },
+    {
+      "name": "《春秋繁露》",
+      "type": "work",
+      "aliases": [
+        "春秋繁露"
+      ]
+    },
+    {
+      "name": "《朱子语类》",
+      "type": "work",
+      "aliases": [
+        "朱子语类"
+      ]
+    },
+    {
+      "name": "《正蒙》",
+      "type": "work",
+      "aliases": [
+        "正蒙"
+      ]
+    },
+    {
+      "name": "《河南程氏粹言》",
+      "type": "work",
+      "aliases": [
+        "《河南程氏粹言·人物篇》",
+        "河南程氏粹言"
+      ]
+    },
+    {
+      "name": "《淮南子》",
+      "type": "work",
+      "aliases": [
+        "《淮南子·泰族训》",
+        "淮南子"
+      ]
+    },
+    {
+      "name": "《焚书》",
+      "type": "work",
+      "aliases": [
+        "焚书"
+      ]
+    },
+    {
+      "name": "《理想国》",
+      "type": "work",
+      "aliases": [
+        "理想国"
+      ]
+    },
+    {
+      "name": "《白虎通义》",
+      "type": "work",
+      "aliases": [
+        "白虎通义"
+      ]
+    },
+    {
+      "name": "《知性改进论》",
+      "type": "work",
+      "aliases": [
+        "《导言：论哲学的目的》",
+        "知性改进论"
+      ]
+    },
+    {
+      "name": "《第一哲学沉思集》",
+      "type": "work",
+      "aliases": [
+        "第一哲学沉思集"
+      ]
+    },
+    {
+      "name": "《精神现象学》",
+      "type": "work",
+      "aliases": [
+        "精神现象学"
+      ]
+    },
+    {
+      "name": "《纯粹理性批判》",
+      "type": "work",
+      "aliases": [
+        "纯粹理性批判"
+      ]
+    },
+    {
+      "name": "《美诺篇》",
+      "type": "work",
+      "aliases": [
+        "美诺篇"
+      ]
+    },
+    {
+      "name": "《老子指略》",
+      "type": "work",
+      "aliases": [
+        "老子指略"
+      ]
+    },
+    {
+      "name": "《老子注》",
+      "type": "work",
+      "aliases": [
+        "老子注"
+      ]
+    },
+    {
+      "name": "《肇论》",
+      "type": "work",
+      "aliases": [
+        "肇论"
+      ]
+    },
+    {
+      "name": "《范畴篇》",
+      "type": "work",
+      "aliases": [
+        "范畴篇"
+      ]
+    },
+    {
+      "name": "《荀子》",
+      "type": "work",
+      "aliases": [
+        "《荀子·子道》"
+      ]
+    },
+    {
+      "name": "《补大学格物致知传》",
+      "type": "work",
+      "aliases": [
+        "补大学格物致知传"
+      ]
+    },
+    {
+      "name": "《西铭》",
+      "type": "work",
+      "aliases": [
+        "《订顽》",
+        "西铭"
+      ]
+    },
+    {
+      "name": "《论衡》",
+      "type": "work",
+      "aliases": [
+        "论衡"
+      ]
+    },
+    {
+      "name": "《论语》",
+      "type": "work",
+      "aliases": [
+        "《肩水金关汉简〈论语〉》",
+        "《论语·雍也》",
+        "《论语·颜渊》",
+        "论语"
+      ]
+    },
+    {
+      "name": "《读四书大全说》",
+      "type": "work",
+      "aliases": [
+        "读四书大全说"
+      ]
+    },
+    {
+      "name": "《象山语录》",
+      "type": "work",
+      "aliases": [
+        "象山语录"
+      ]
+    },
+    {
+      "name": "《通书》",
+      "type": "work",
+      "aliases": [
+        "通书"
+      ]
+    },
+    {
+      "name": "《道德原则研究》",
+      "type": "work",
+      "aliases": [
+        "道德原则研究"
+      ]
+    },
+    {
+      "name": "《道德形而上学》",
+      "type": "work",
+      "aliases": [
+        "道德形而上学"
+      ]
+    },
+    {
+      "name": "《道德经》",
+      "type": "work",
+      "aliases": [
+        "道德经"
+      ]
+    },
+    {
+      "name": "《静安文集》",
+      "type": "work",
+      "aliases": [
+        "静安文集"
+      ]
+    },
+    {
+      "name": "《韩非子》",
+      "type": "work",
+      "aliases": [
+        "韩非子"
+      ]
+    },
+    {
+      "name": "《鲁斋遗书》",
+      "type": "work",
+      "aliases": [
+        "鲁斋遗书"
+      ]
     }
   ]
 }

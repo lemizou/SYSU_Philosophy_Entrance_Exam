@@ -86,19 +86,11 @@ class SearchConditionsTest(unittest.TestCase):
         conditions = SearchConditions(years=(2023, 2024))
         self.assertEqual(self.ids(conditions), ["q1", "q2", "q3"])
 
-    def test_tag_any_mode(self) -> None:
+    def test_tags_in_same_category_use_or(self) -> None:
         conditions = SearchConditions(
             tags={"philosophers": ("康德", "朱熹")},
-            tag_modes={"philosophers": "any"},
         )
         self.assertEqual(self.ids(conditions), ["q1", "q3"])
-
-    def test_tag_all_mode(self) -> None:
-        conditions = SearchConditions(
-            tags={"philosophers": ("康德", "黑格尔")},
-            tag_modes={"philosophers": "all"},
-        )
-        self.assertEqual(self.ids(conditions), ["q1"])
 
     def test_different_tag_categories_use_and(self) -> None:
         conditions = SearchConditions(
@@ -116,10 +108,6 @@ class SearchConditionsTest(unittest.TestCase):
     def test_subject_alias_is_canonicalized(self) -> None:
         conditions = SearchConditions(subjects=("西方哲学史",))
         self.assertEqual(self.ids(conditions), ["q1", "q2"])
-
-    def test_invalid_tag_mode_is_rejected(self) -> None:
-        with self.assertRaises(ValueError):
-            SearchConditions(tag_modes={"philosophers": "xor"})
 
     def test_space_separated_terms_use_and(self) -> None:
         conditions = SearchConditions(keyword="康德 黑格尔")
