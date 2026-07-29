@@ -23,7 +23,7 @@ QUESTIONS = [
         "id": "q1",
         "year": 2024,
         "subject": "外国哲学史",
-        "section": "简答",
+        "section": "第一类",
         "verification": "cross_checked",
         "question": "比较康德与黑格尔。",
         "passage": "",
@@ -37,7 +37,7 @@ QUESTIONS = [
         "id": "q2",
         "year": 2023,
         "subject": "外国哲学史",
-        "section": "论述",
+        "section": "第二类",
         "verification": "single_source",
         "question": "安瑟尔谟的上帝存在证明。",
         "passage": "",
@@ -51,7 +51,7 @@ QUESTIONS = [
         "id": "q3",
         "year": 2024,
         "subject": "中国哲学史",
-        "section": "论述",
+        "section": "第三类",
         "verification": "cross_checked",
         "question": "朱熹的理气论。",
         "passage": "",
@@ -157,7 +157,7 @@ class SearchConditionsTest(unittest.TestCase):
     def test_section_and_verification_filters_use_and(self) -> None:
         conditions = SearchConditions(
             years=(2023, 2024),
-            sections=("论述",),
+            sections=("第三类",),
             verification=("cross_checked",),
         )
         self.assertEqual(self.ids(conditions), ["q3"])

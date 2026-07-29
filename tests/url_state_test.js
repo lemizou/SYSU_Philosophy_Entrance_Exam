@@ -9,7 +9,7 @@ const state = {
   subject: "外国哲学史",
   yearFrom: "2020",
   yearTo: "2025",
-  section: "简答",
+  section: "第一类",
   verification: "cross_checked",
   sortMode: "year_desc",
   tags: {

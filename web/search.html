@@ -820,9 +820,14 @@
         const section = question.section || "未标注";
         sectionCounts.set(section, (sectionCounts.get(section) || 0) + 1);
       });
+      const sectionOrder = new Map(
+        ["第一类", "第二类", "第三类"].map((name, index) => [name, index])
+      );
       const sections = [...sectionCounts]
         .sort((left, right) =>
-          right[1] - left[1] || left[0].localeCompare(right[0], "zh-CN"));
+          (sectionOrder.get(left[0]) ?? 99)
+          - (sectionOrder.get(right[0]) ?? 99)
+          || left[0].localeCompare(right[0], "zh-CN"));
       $("sectionFilter").insertAdjacentHTML(
         "beforeend",
         sections.map(([name, count]) =>

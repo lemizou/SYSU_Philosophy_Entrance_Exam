@@ -36,6 +36,7 @@ OPTIONAL_TEXT_FIELDS = (
     "transcription_note",
 )
 SUBJECTS = {"中国哲学史", "外国哲学史"}
+SECTION_TYPES = {"第一类", "第二类", "第三类"}
 VERIFICATION_STATES = {"single_source", "cross_checked"}
 PASSAGE_STATES = {"full_text", "source_summary"}
 
@@ -68,8 +69,7 @@ class DataIntegrityTest(unittest.TestCase):
                 self.assertGreaterEqual(question["year"], 2000)
                 self.assertLessEqual(question["year"], 2100)
                 self.assertIn(question["subject"], SUBJECTS)
-                self.assertIsInstance(question["section"], str)
-                self.assertTrue(question["section"].strip())
+                self.assertIn(question["section"], SECTION_TYPES)
                 self.assertIsInstance(question["number"], int)
                 self.assertGreater(question["number"], 0)
                 self.assertIsInstance(question["question"], str)
@@ -93,6 +93,18 @@ class DataIntegrityTest(unittest.TestCase):
             if count > 1
         ]
         self.assertEqual(duplicates, [])
+
+    def test_each_paper_uses_category_prefix_in_order(self) -> None:
+        expected_order = ["第一类", "第二类", "第三类"]
+        paper_sections: dict[tuple[int, str], list[str]] = {}
+        for question in self.questions:
+            key = (question["year"], question["subject"])
+            sections = paper_sections.setdefault(key, [])
+            if question["section"] not in sections:
+                sections.append(question["section"])
+        for paper, sections in paper_sections.items():
+            with self.subTest(paper=paper):
+                self.assertEqual(sections, expected_order[: len(sections)])
 
     def test_tag_fields_are_string_arrays(self) -> None:
         for question in self.questions:
