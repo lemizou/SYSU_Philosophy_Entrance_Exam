@@ -219,5 +219,19 @@ class WindowsLauncherTest(unittest.TestCase):
         self.assertIn("启动检索自检通过", completed.stdout)
 
 
+class SiteEntryPointTest(unittest.TestCase):
+    def test_root_index_redirects_to_search_and_preserves_url_state(self) -> None:
+        content = (PROJECT_ROOT / "index.html").read_text(encoding="utf-8")
+
+        self.assertIn('content="0; url=web/search.html"', content)
+        self.assertIn(
+            'new URL("web/search.html", window.location.href)',
+            content,
+        )
+        self.assertIn("target.search = window.location.search", content)
+        self.assertIn("target.hash = window.location.hash", content)
+        self.assertIn('href="web/search.html"', content)
+
+
 if __name__ == "__main__":
     unittest.main()

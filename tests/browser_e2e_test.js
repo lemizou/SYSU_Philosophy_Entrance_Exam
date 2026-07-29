@@ -157,7 +157,7 @@ async function main() {
   try {
     await waitUntil(async () =>
       (await httpGet(
-        `http://127.0.0.1:${webPort}/web/search.html`
+        `http://127.0.0.1:${webPort}/`
       )).status === 200);
     const target = await waitUntil(async () => {
       const response = await httpGet(
@@ -199,7 +199,7 @@ async function main() {
       person: "康德"
     });
     await cdp.call("Page.navigate", {
-      url: `http://127.0.0.1:${webPort}/web/search.html?${query}`
+      url: `http://127.0.0.1:${webPort}/?${query}#entrypoint-test`
     });
 
     async function evaluate(expression) {
@@ -219,7 +219,10 @@ async function main() {
           loadedCount: api.loadedCount,
           resultCount: api.resultIds.length,
           state: api.state,
-          total: document.getElementById("total").textContent
+          total: document.getElementById("total").textContent,
+          pathname: window.location.pathname,
+          search: window.location.search,
+          hash: window.location.hash
         };
       })()`);
       return value;
@@ -233,6 +236,9 @@ async function main() {
     assert.equal(restored.state.yearTo, "2025");
     assert.equal(restored.state.section, "第一类");
     assert.deepEqual(restored.state.tags.philosophers, ["康德"]);
+    assert.equal(restored.pathname, "/web/search.html");
+    assert.equal(restored.search, `?${query}`);
+    assert.equal(restored.hash, "#entrypoint-test");
 
     const resized = await evaluate(`(() => {
       const separator = document.getElementById("paneResizer");
