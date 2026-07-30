@@ -192,12 +192,12 @@ async function main() {
     ]);
     const query = new URLSearchParams({
       q: "康德",
-      subject: "外国哲学史",
-      from: "2020",
-      to: "2025",
-      section: "第一类",
-      person: "康德"
+      subject: "外国哲学史"
     });
+    ["2020", "2021", "2022", "2023", "2024", "2025"]
+      .forEach((year) => query.append("year", year));
+    query.set("section", "第一类");
+    query.set("person", "康德");
     await cdp.call("Page.navigate", {
       url: `http://127.0.0.1:${webPort}/?${query}#entrypoint-test`
     });
@@ -222,7 +222,9 @@ async function main() {
           total: document.getElementById("total").textContent,
           pathname: window.location.pathname,
           search: window.location.search,
-          hash: window.location.hash
+          hash: window.location.hash,
+          activeResults: document.querySelectorAll(".result.active").length,
+          detailText: document.getElementById("detail").textContent.trim()
         };
       })()`);
       return value;
@@ -232,13 +234,51 @@ async function main() {
     assert.ok(restored.resultCount > 0);
     assert.equal(restored.state.keyword, "康德");
     assert.equal(restored.state.subject, "外国哲学史");
-    assert.equal(restored.state.yearFrom, "2020");
-    assert.equal(restored.state.yearTo, "2025");
+    assert.deepEqual(
+      restored.state.years,
+      ["2020", "2021", "2022", "2023", "2024", "2025"]
+    );
     assert.equal(restored.state.section, "第一类");
     assert.deepEqual(restored.state.tags.philosophers, ["康德"]);
     assert.equal(restored.pathname, "/web/search.html");
     assert.equal(restored.search, `?${query}`);
     assert.equal(restored.hash, "#entrypoint-test");
+    assert.equal(restored.activeResults, 0);
+    assert.equal(restored.detailText, "待 检 索");
+
+    const filterLayout = await evaluate(`(() => {
+      const controls = document.querySelector(".controls");
+      const filterStrip = document.querySelector(".filter-strip");
+      const section = document.getElementById("sectionFilter");
+      const subject = document.getElementById("subject");
+      const sort = document.getElementById("sortMode");
+      const styleFor = (element) => {
+        const style = getComputedStyle(element);
+        return {
+          height: style.height,
+          fontSize: style.fontSize,
+          borderRadius: style.borderRadius,
+          backgroundColor: style.backgroundColor
+        };
+      };
+      return {
+        topChildCount: controls.children.length,
+        subjectInTopControls: controls.contains(subject),
+        filterSelectOrder: [...filterStrip.querySelectorAll("select")]
+          .map((select) => select.id),
+        sectionStyle: styleFor(section),
+        subjectStyle: styleFor(subject),
+        sortStyle: styleFor(sort)
+      };
+    })()`);
+    assert.equal(filterLayout.topChildCount, 2);
+    assert.equal(filterLayout.subjectInTopControls, false);
+    assert.deepEqual(
+      filterLayout.filterSelectOrder,
+      ["sectionFilter", "subject", "sortMode"]
+    );
+    assert.deepEqual(filterLayout.subjectStyle, filterLayout.sectionStyle);
+    assert.deepEqual(filterLayout.subjectStyle, filterLayout.sortStyle);
 
     const resized = await evaluate(`(() => {
       const separator = document.getElementById("paneResizer");
@@ -254,6 +294,43 @@ async function main() {
     })()`);
     assert.deepEqual(resized, { before: 52, after: 54 });
 
+    await cdp.call("Page.navigate", {
+      url: `http://127.0.0.1:${webPort}/`
+    });
+    const initialEmptySelection = await waitUntil(async () => {
+      const value = await evaluate(`(() => {
+        const api = window.__searchAppTestApi;
+        if (!api || api.loadedCount !== 431 || window.location.search) return null;
+        const pending = document.querySelector(".detail-pending");
+        const pendingStyle = getComputedStyle(pending);
+        const detailRect = document.getElementById("detail").getBoundingClientRect();
+        const pendingRect = pending.getBoundingClientRect();
+        return {
+          activeResults: document.querySelectorAll(".result.active").length,
+          detailText: document.getElementById("detail").textContent.trim(),
+          activePane: document.querySelector(".workspace").dataset.mobilePane,
+          pendingColor: pendingStyle.color,
+          pendingFontSize: pendingStyle.fontSize,
+          pendingCenterOffsetX: Math.abs(
+            pendingRect.left + pendingRect.width / 2
+            - (detailRect.left + detailRect.width / 2)
+          ),
+          pendingCenterOffsetY: Math.abs(
+            pendingRect.top + pendingRect.height / 2
+            - (detailRect.top + detailRect.height / 2)
+          )
+        };
+      })()`);
+      return value?.detailText === "待 检 索" ? value : null;
+    });
+    assert.equal(initialEmptySelection.activeResults, 0);
+    assert.equal(initialEmptySelection.detailText, "待 检 索");
+    assert.equal(initialEmptySelection.activePane, "results");
+    assert.equal(initialEmptySelection.pendingColor, "rgb(194, 199, 205)");
+    assert.equal(initialEmptySelection.pendingFontSize, "14px");
+    assert.ok(initialEmptySelection.pendingCenterOffsetX <= 1);
+    assert.ok(initialEmptySelection.pendingCenterOffsetY <= 1);
+
     await cdp.call("Emulation.setDeviceMetricsOverride", {
       width: 390,
       height: 844,
@@ -264,17 +341,38 @@ async function main() {
       const value = await evaluate(`(() => {
         const switcher = document.querySelector(".mobile-pane-switch");
         if (getComputedStyle(switcher).display === "none") return null;
+        const beforeClick = {
+          activeResults: document.querySelectorAll(".result.active").length,
+          detailText: document.getElementById("detail").textContent.trim(),
+          activePane: document.querySelector(".workspace").dataset.mobilePane
+        };
         document.querySelector(".result-summary")?.click();
         return {
           switcherDisplay: getComputedStyle(switcher).display,
-          activePane: document.querySelector(".workspace").dataset.mobilePane
+          beforeClick,
+          activePane: document.querySelector(".workspace").dataset.mobilePane,
+          activeResults: document.querySelectorAll(".result.active").length,
+          detailHeading: document.querySelector(".detail h2")?.textContent
         };
       })()`);
       return value?.activePane === "detail" ? value : null;
     });
     assert.equal(mobile.switcherDisplay, "grid");
+    assert.deepEqual(mobile.beforeClick, {
+      activeResults: 0,
+      detailText: "待 检 索",
+      activePane: "results"
+    });
     assert.equal(mobile.activePane, "detail");
+    assert.equal(mobile.activeResults, 1);
+    assert.ok(mobile.detailHeading);
     await cdp.call("Emulation.clearDeviceMetricsOverride");
+
+    await cdp.call("Page.navigate", {
+      url: `http://127.0.0.1:${webPort}/?${query}#entrypoint-test`
+    });
+    await waitUntil(async () =>
+      (await evaluate("window.__searchAppTestApi?.state.keyword")) === "康德");
 
     await evaluate(`(() => {
       document.getElementById("keyword").value = "朱熹";
@@ -290,6 +388,136 @@ async function main() {
     );
     await waitUntil(async () =>
       (await evaluate("window.__searchAppTestApi.state.keyword")) === "康德");
+
+    await evaluate(`(() => {
+      document.dispatchEvent(new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true
+      }));
+      document.getElementById("subject").value = "外国哲学史";
+      document.getElementById("sectionFilter").value = "full_paper";
+      document.querySelector('[data-field="years"]').click();
+      document.querySelector('[data-field="years"][data-tag="2025"]').click();
+      document.querySelector('[data-field="years"][data-tag="2024"]').click();
+      return true;
+    })()`);
+    const pendingOverview = await waitUntil(async () => {
+      const value = await evaluate(`(() => {
+        const state = window.__searchAppTestApi.state;
+        if (state.section !== "full_paper") return null;
+        return {
+          resultCount: document.getElementById("resultCount").textContent,
+          subjects: [...document.querySelectorAll(
+            ".paper-result .result-summary .meta:nth-child(2)"
+          )].map((node) => node.textContent),
+          activeResults: document.querySelectorAll(".result.active").length,
+          detailText: document.getElementById("detail").textContent.trim(),
+          selectedYears: window.__searchAppTestApi.state.years
+        };
+      })()`);
+      return value?.resultCount === "2 份" ? value : null;
+    });
+    assert.equal(pendingOverview.resultCount, "2 份");
+    assert.deepEqual(
+      pendingOverview.subjects,
+      ["外国哲学史", "外国哲学史"]
+    );
+    assert.equal(pendingOverview.activeResults, 0);
+    assert.equal(pendingOverview.detailText, "待 检 索");
+    assert.deepEqual(pendingOverview.selectedYears, ["2025", "2024"]);
+
+    await evaluate(`(() => {
+      document.querySelector(".paper-result .result-summary")?.click();
+      return true;
+    })()`);
+    const overview = await waitUntil(async () => {
+      const value = await evaluate(`(() => {
+        return {
+          paperHeadingCount: document.querySelectorAll(".paper-heading").length,
+          paginationCount: document.querySelectorAll(".paper-pagination").length,
+          firstDetailClass: document.getElementById("detail")
+            .firstElementChild?.className,
+          sectionHeadingCount: document.querySelectorAll(
+            ".paper-section-heading"
+          ).length,
+          questionCount: document.querySelectorAll(".paper-question").length,
+          plainPassageCount: document.querySelectorAll(
+            ".paper-passage-plain"
+          ).length,
+          passageLabelCount: document.querySelectorAll(
+            ".paper-passage-label"
+          ).length
+        };
+      })()`);
+      return value?.questionCount === 8 ? value : null;
+    });
+    assert.equal(overview.paperHeadingCount, 0);
+    assert.equal(overview.paginationCount, 0);
+    assert.equal(overview.firstDetailClass, "paper-question");
+    assert.equal(overview.sectionHeadingCount, 0);
+    assert.equal(overview.questionCount, 8);
+    assert.equal(overview.plainPassageCount, 2);
+    assert.equal(overview.passageLabelCount, 0);
+
+    const olderPaper = await evaluate(`(() => {
+      document.querySelectorAll(".paper-result .result-summary")[1]?.click();
+      return {
+        activeYear: document.querySelector(".paper-result.active .meta")
+          ?.textContent,
+        sectionHeadingCount: document.querySelectorAll(
+          ".paper-section-heading"
+        ).length,
+        questionCount: document.querySelectorAll(".paper-question").length
+      };
+    })()`);
+    assert.equal(olderPaper.activeYear, "2024");
+    assert.equal(olderPaper.sectionHeadingCount, 0);
+    assert.equal(olderPaper.questionCount, 8);
+
+    await evaluate(`(() => {
+      document.getElementById("subject").value = "中国哲学史";
+      document.getElementById("clearTags").click();
+      document.querySelector('[data-field="years"]').click();
+      document.querySelector('[data-field="years"][data-tag="2026"]').click();
+      return true;
+    })()`);
+    await waitUntil(async () =>
+      (await evaluate("document.querySelectorAll('.paper-result').length")) === 1);
+    await evaluate(`(() => {
+      document.querySelector(".paper-result .result-summary")?.click();
+      return true;
+    })()`);
+    const plainSecondSection = await waitUntil(async () => {
+      const value = await evaluate(`(() => {
+        const passages = [...document.querySelectorAll(".paper-passage-plain")];
+        if (!passages.length) return null;
+        const passageStyle = getComputedStyle(passages[0]);
+        const questionStyle = getComputedStyle(
+          passages[0].closest(".paper-question")
+            .querySelector(".paper-question-text")
+        );
+        return {
+          passageCount: passages.length,
+          labelCount: document.querySelectorAll(
+            ".paper-passage-plain .paper-passage-label"
+          ).length,
+          background: passageStyle.backgroundColor,
+          borderLeft: passageStyle.borderLeftWidth,
+          marginTop: passageStyle.marginTop,
+          passageFontSize: getComputedStyle(passages[0].querySelector("p")).fontSize,
+          questionFontSize: questionStyle.fontSize
+        };
+      })()`);
+      return value?.passageCount === 4 ? value : null;
+    });
+    assert.equal(plainSecondSection.labelCount, 0);
+    assert.equal(plainSecondSection.background, "rgba(0, 0, 0, 0)");
+    assert.equal(plainSecondSection.borderLeft, "0px");
+    assert.equal(plainSecondSection.marginTop, "0px");
+    assert.equal(
+      plainSecondSection.passageFontSize,
+      plainSecondSection.questionFontSize
+    );
 
     assert.deepEqual(errors, [], `浏览器控制台错误：${errors.join("; ")}`);
     await cdp.call("Browser.close");
