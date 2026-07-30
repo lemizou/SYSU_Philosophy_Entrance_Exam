@@ -22,6 +22,7 @@
     return {
       keyword: params.get("q") || "",
       subject: params.get("subject") || "",
+      years: [...new Set(params.getAll("year").filter(Boolean))],
       yearFrom: params.get("from") || "",
       yearTo: params.get("to") || "",
       section: params.get("section") || "",
@@ -34,6 +35,7 @@
     const params = new URLSearchParams();
     if (state.keyword) params.set("q", state.keyword);
     if (state.subject) params.set("subject", state.subject);
+    for (const year of state.years || []) params.append("year", year);
     if (state.yearFrom) params.set("from", state.yearFrom);
     if (state.yearTo) params.set("to", state.yearTo);
     if (state.section) params.set("section", state.section);

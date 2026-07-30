@@ -32,6 +32,8 @@ Chrome 端到端测试会临时启动本地检索服务和无头 Chrome，完成
 | 同类多标签任一匹配 | 同上；同一标签分类固定使用 OR |
 | 跨类标签全部满足 | 同上；不同标签分类固定使用 AND |
 | 年份、科目、题型组合 | `test_year_subject_section_combination_and_no_result` |
+| 年份索引多选与旧年份区间链接兼容 | `url_state_test.js` 和 `browser_e2e_test.js` |
+| 全卷概览的筛选、分卷与原始题序 | `full_paper_test.js` 和 `browser_e2e_test.js` |
 | 空条件 | `test_all_431_questions_load_and_empty_conditions_return_all` |
 | 无结果 | `test_year_subject_section_combination_and_no_result` |
 | URL 状态恢复 | `url_state_test.js` 和 `browser_e2e_test.js` |

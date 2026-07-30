@@ -89,14 +89,13 @@ main {
 
 .controls {
   display: grid;
-  grid-template-columns: minmax(300px, 1fr) 180px 108px;
+  grid-template-columns: minmax(300px, 1fr) 108px;
   gap: 8px;
   align-items: stretch;
   margin: 0 0 8px;
 }
 
 .search-box,
-#subject,
 #search {
   height: var(--control-height);
   min-height: var(--control-height);
@@ -145,12 +144,6 @@ select {
   color: var(--ink-dark);
 }
 
-#subject {
-  width: 100%;
-  padding: 0 28px 0 11px;
-  font-size: 11px;
-}
-
 #search {
   height: 34px;
   min-height: 34px;
@@ -179,8 +172,12 @@ button:focus-visible {
 
 .filter-strip {
   display: grid;
-  grid-template-columns: auto 112px 112px minmax(130px, .8fr)
-    minmax(138px, .8fr) auto;
+  grid-template-columns:
+    auto
+    minmax(130px, .8fr)
+    minmax(130px, .8fr)
+    minmax(138px, .8fr)
+    auto;
   gap: 7px;
   align-items: stretch;
   margin: 0 0 10px;
@@ -247,8 +244,9 @@ button:focus-visible {
 }
 
 .tag-panel {
-  height: auto;
+  height: 100%;
   min-height: 0;
+  overflow: hidden;
   border: 0;
   border-right: 1px solid var(--line);
   background: transparent;
@@ -309,10 +307,22 @@ button:focus-visible {
   color: var(--muted);
 }
 
+.tag-scroll-region {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-color: #c8cdd4 transparent;
+  scrollbar-width: thin;
+}
+
 .tag-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   border-bottom: 1px solid var(--line);
+  background: var(--white);
 }
 
 .tag-tab {
@@ -363,8 +373,12 @@ button:focus-visible {
 }
 
 .tag-tools {
+  position: sticky;
+  top: 38px;
+  z-index: 1;
   padding: 8px 9px;
   border-bottom: 1px solid var(--line);
+  background: var(--white);
 }
 
 .tag-search {
@@ -387,11 +401,12 @@ button:focus-visible {
 
 .tag-search input {
   padding: 6px 8px;
-  font-size: 10px;
+  font-size: 8px;
 }
 
 .tag-list {
   min-height: 0;
+  overflow: visible;
   padding: 3px 0 7px;
 }
 
@@ -658,6 +673,7 @@ mark.match {
 }
 
 .detail {
+  position: relative;
   padding: 18px 21px;
 }
 
@@ -699,6 +715,16 @@ mark.match {
 .empty {
   padding: 28px 18px;
   font-size: 11px;
+}
+
+.detail-pending {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #c2c7cd;
+  font-size: 14px;
+  font-weight: 400;
 }
 
 footer {
@@ -756,6 +782,8 @@ footer a:hover {
 
   body {
     min-width: 320px;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   header {
@@ -777,20 +805,19 @@ footer a:hover {
 
   main {
     width: 100%;
-    height: calc(100dvh - var(--header-height));
-    grid-template-rows: auto auto minmax(0, 1fr);
+    height: calc(100dvh - var(--header-height) + 24px);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
     padding: 5px 7px;
   }
 
   .controls {
-    grid-template-columns: minmax(0, 1fr) 98px 64px;
+    grid-template-columns: minmax(0, 1fr) 64px;
     gap: 5px;
     align-items: stretch;
     margin-bottom: 5px;
   }
 
-  .search-box,
-  #subject {
+  .search-box {
     height: var(--control-height);
     min-height: var(--control-height);
     align-self: stretch;
@@ -814,12 +841,6 @@ footer a:hover {
   .search-box input {
     padding-right: 6px;
     font-size: 9px;
-  }
-
-  #subject {
-    padding: 0 18px 0 6px;
-    font-size: 8px;
-    line-height: normal;
   }
 
   #search {
@@ -879,6 +900,11 @@ footer a:hover {
     border-bottom: 1px solid var(--ink-dark);
   }
 
+  .tag-scroll-region {
+    display: contents;
+    overflow: visible;
+  }
+
   .tag-panel-head {
     grid-column: 1;
     grid-row: 1;
@@ -905,6 +931,7 @@ footer a:hover {
   }
 
   .tag-tabs {
+    position: static;
     grid-column: 2;
     grid-row: 1;
   }
@@ -920,6 +947,7 @@ footer a:hover {
   }
 
   .tag-tools {
+    position: static;
     grid-column: 1 / -1;
     grid-row: 2;
     padding: 3px 5px;
@@ -1118,7 +1146,185 @@ footer a:hover {
   }
 
   footer {
-    display: none;
+    display: flex;
+  }
+
+  footer a {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.paper-result .result-summary {
+  align-items: center;
+  padding-top: 17px;
+  padding-bottom: 17px;
+}
+
+.paper-sections {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.paper-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--ink-dark);
+}
+
+.detail .paper-kicker {
+  margin: 0 0 5px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+
+.paper-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.paper-pagination button {
+  min-width: 48px;
+  min-height: 28px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--white);
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.paper-pagination button:hover {
+  border-color: #aeb5be;
+  color: var(--ink-dark);
+}
+
+.paper-pagination button[aria-current="page"] {
+  border-color: var(--ink-dark);
+  background: var(--ink-dark);
+  color: var(--white);
+}
+
+.paper-body {
+  padding-top: 0;
+}
+
+.detail .paper-section {
+  margin: 0 0 28px;
+}
+
+.paper-section-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 4px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+
+.detail .paper-section-heading h3 {
+  margin: 0;
+  color: var(--ink-dark);
+  font-size: 12px;
+  letter-spacing: .08em;
+}
+
+.detail .paper-section-heading p {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+  text-align: right;
+}
+
+.paper-question {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 4px 14px;
+  padding: 15px 0;
+  border-bottom: 1px solid #edf0f3;
+}
+
+.paper-question-number {
+  padding-top: 2px;
+  color: var(--muted);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.detail .paper-question-text {
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.paper-passage {
+  grid-column: 2;
+  margin-top: 7px;
+  padding: 11px 13px;
+  border-left: 2px solid #bcc3cc;
+  background: #f7f8fa;
+}
+
+.paper-passage-label {
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+
+.detail .paper-passage p {
+  color: #424850;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.paper-passage.paper-passage-plain {
+  margin-top: 0;
+  padding: 0;
+  border-left: 0;
+  background: transparent;
+}
+
+.detail .paper-passage.paper-passage-plain p {
+  color: var(--ink-dark);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+@media (max-width: 560px) {
+  .paper-heading,
+  .paper-section-heading {
+    display: block;
+  }
+
+  .paper-pagination {
+    justify-content: flex-start;
+    margin-top: 12px;
+  }
+
+  .detail .paper-section-heading p {
+    margin-top: 5px;
+    text-align: left;
+  }
+
+  .paper-question {
+    grid-template-columns: 1fr;
+  }
+
+  .paper-passage {
+    grid-column: 1;
   }
 }
 

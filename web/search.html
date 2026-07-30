@@ -62,7 +62,7 @@
     }
     .filter-strip {
       display: grid;
-      grid-template-columns: auto 122px 122px minmax(145px, .8fr) 170px 150px auto;
+      grid-template-columns: auto minmax(145px, .8fr) 170px 150px auto;
       gap: 8px;
       align-items: stretch;
       margin-bottom: 18px;
@@ -470,7 +470,7 @@
     @media (max-width: 1200px) {
       .search-layout { grid-template-columns: 1fr; }
       .tag-panel { height: auto; max-height: 410px; }
-      .tag-tabs { grid-template-columns: repeat(5, 1fr); }
+      .tag-tabs { grid-template-columns: repeat(6, 1fr); }
       .tag-tab { border-bottom: 0; }
       .tag-tab:nth-child(3n) { border-right: 1px solid var(--line); }
       .tag-tab:last-child { border-right: 0; }
@@ -511,22 +511,22 @@
         <label for="keyword">检索</label>
         <input id="keyword" autocomplete="off" placeholder="例如：康德 先验、康德 OR 黑格尔、-费希特">
       </div>
-      <select id="subject" aria-label="按科目筛选"><option value="">全部科目</option></select>
       <button id="search" type="button">Search</button>
     </div>
     <div class="filter-strip" aria-label="结构化筛选和排序">
       <div class="filter-strip-title">检索条件</div>
       <label class="filter-control">
-        <span>起始年份</span>
-        <select id="yearFrom"><option value="">不限</option></select>
-      </label>
-      <label class="filter-control">
-        <span>终止年份</span>
-        <select id="yearTo"><option value="">不限</option></select>
-      </label>
-      <label class="filter-control">
         <span>题型</span>
-        <select id="sectionFilter"><option value="">全部题型</option></select>
+        <select id="sectionFilter">
+          <option value="">全部题型</option>
+          <option value="full_paper">全卷概览</option>
+        </select>
+      </label>
+      <label class="filter-control">
+        <span>科目</span>
+        <select id="subject" aria-label="按科目筛选">
+          <option value="">全部科目</option>
+        </select>
       </label>
       <label class="filter-control">
         <span>结果排序</span>
@@ -542,19 +542,21 @@
     </div>
 
     <div class="search-layout">
-      <aside class="tag-panel" aria-label="分类标签筛选">
+      <aside class="tag-panel" aria-label="年份与分类标签筛选">
         <div class="tag-panel-head">
           <div class="tag-panel-title">索引筛选 <span id="selectedTagCount">未选择</span></div>
           <button class="clear-tags" id="clearTags" type="button" disabled>清空</button>
         </div>
-        <div class="tag-tabs" id="tagTabs"></div>
-        <div class="tag-tools">
-          <div class="tag-search">
-            <label for="tagSearch">标签</label>
-            <input id="tagSearch" autocomplete="off" placeholder="筛选当前分类">
+        <div class="tag-scroll-region">
+          <div class="tag-tabs" id="tagTabs"></div>
+          <div class="tag-tools">
+            <div class="tag-search">
+              <label for="tagSearch" id="tagSearchLabel">年份</label>
+              <input id="tagSearch" autocomplete="off" placeholder="筛选当前分类">
+            </div>
           </div>
+          <div class="tag-list" id="tagList"></div>
         </div>
-        <div class="tag-list" id="tagList"></div>
       </aside>
 
       <div class="workspace" data-mobile-pane="results">
@@ -576,7 +578,9 @@
           aria-valuenow="52" tabindex="0"></div>
         <aside class="detail-panel">
           <div class="panel-head">试题详情</div>
-          <div class="detail" id="detail"></div>
+          <div class="detail" id="detail">
+            <div class="detail-pending">待 检 索</div>
+          </div>
         </aside>
       </div>
     </div>
@@ -594,6 +598,7 @@
   <script src="search_engine.js"></script>
   <script src="search_highlight.js"></script>
   <script src="result_sort.js"></script>
+  <script src="full_paper.js"></script>
   <script src="url_state.js"></script>
   <script>
     const $ = (id) => document.getElementById(id);
@@ -603,8 +608,9 @@
     let tagCounts = new Map();
     let filtered = [];
     let availableYears = [];
-    let activeIndex = 0;
-    let activeTagField = "philosophers";
+    let selectedYears = [];
+    let activeIndex = -1;
+    let activeTagField = "years";
     let activeKeywordQuery = { positiveGroups: [], excludedTerms: [] };
     let urlStateReady = false;
 
@@ -613,8 +619,10 @@
       String(value ?? "").replace(/[&<>"']/g, (c) =>
         ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[c]);
     const tagFields = SearchEngine.TAG_FIELDS;
+    const indexFields = ["years", ...tagFields];
     const selectedTags = Object.fromEntries(tagFields.map((field) => [field, []]));
     const tagFieldConfig = {
+      years: { label: "年份" },
       philosophers: { label: "人物", type: "philosopher" },
       schools: { label: "流派", type: "school" },
       periods: { label: "时期", type: "period" },
@@ -622,8 +630,12 @@
       works: { label: "著作", type: "work" }
     };
     const fieldByTagType = Object.fromEntries(
-      Object.entries(tagFieldConfig).map(([field, config]) => [config.type, field])
+      Object.entries(tagFieldConfig)
+        .filter(([, config]) => config.type)
+        .map(([field, config]) => [config.type, field])
     );
+    const selectedValuesFor = (field) =>
+      field === "years" ? selectedYears : selectedTags[field];
     const tagsFor = (question) =>
       tagFields.flatMap((field) => question[field] || []);
     const canonicalize = (value) => {
@@ -632,21 +644,19 @@
     };
 
     function buildSearchConditions() {
-      const yearFrom = Number($("yearFrom").value) || null;
-      const yearTo = Number($("yearTo").value) || null;
       const subject = $("subject").value;
       return {
         keyword: $("keyword").value,
         tags: Object.fromEntries(
           tagFields.map((field) => [field, [...selectedTags[field]]])
         ),
-        years: yearFrom === null && yearTo === null
-          ? []
-          : availableYears.filter((year) =>
-            (yearFrom === null || year >= yearFrom)
-            && (yearTo === null || year <= yearTo)),
+        years: selectedYears.map(Number),
         subjects: subject ? [subject] : [],
-        sections: $("sectionFilter").value ? [$("sectionFilter").value] : [],
+        sections: $("sectionFilter").value
+          && $("sectionFilter").value !== FullPaper.SECTION_VALUE
+          ? [$("sectionFilter").value]
+          : [],
+        fullPaper: $("sectionFilter").value === FullPaper.SECTION_VALUE,
         sortMode: $("sortMode").value
       };
     }
@@ -655,8 +665,9 @@
       return {
         keyword: $("keyword").value,
         subject: $("subject").value,
-        yearFrom: $("yearFrom").value,
-        yearTo: $("yearTo").value,
+        years: [...selectedYears],
+        yearFrom: "",
+        yearTo: "",
         section: $("sectionFilter").value,
         sortMode: $("sortMode").value,
         tags: Object.fromEntries(
@@ -687,17 +698,23 @@
         ? state.sortMode
         : "relevance";
 
-      let yearFrom = selectHasValue("yearFrom", state.yearFrom)
-        ? state.yearFrom
-        : "";
-      let yearTo = selectHasValue("yearTo", state.yearTo)
-        ? state.yearTo
-        : "";
-      if (yearFrom && yearTo && Number(yearFrom) > Number(yearTo)) {
-        [yearFrom, yearTo] = [yearTo, yearFrom];
+      let restoredYears = (state.years || [])
+        .map(String)
+        .filter((year) => availableYears.includes(Number(year)));
+      if (!restoredYears.length && (state.yearFrom || state.yearTo)) {
+        const yearFrom = Number(state.yearFrom) || -Infinity;
+        const yearTo = Number(state.yearTo) || Infinity;
+        const lower = Math.min(yearFrom, yearTo);
+        const upper = Math.max(yearFrom, yearTo);
+        restoredYears = availableYears
+          .filter((year) => year >= lower && year <= upper)
+          .map(String);
       }
-      $("yearFrom").value = yearFrom;
-      $("yearTo").value = yearTo;
+      selectedYears.splice(
+        0,
+        selectedYears.length,
+        ...new Set(restoredYears)
+      );
 
       for (const field of tagFields) {
         const restoredTags = (state.tags[field] || [])
@@ -710,8 +727,8 @@
         );
       }
       activeTagField =
-        tagFields.find((field) => selectedTags[field].length)
-        || "philosophers";
+        indexFields.find((field) => selectedValuesFor(field).length)
+        || "years";
       $("tagSearch").value = "";
     }
 
@@ -736,10 +753,6 @@
       availableYears = [...new Set(questions.map((q) => q.year))]
         .sort((a, b) => a - b);
       const subjects = [...new Set(questions.map((q) => q.subject))].sort();
-      const yearOptions = [...availableYears].reverse()
-        .map((value) => `<option value="${value}">${value}</option>`).join("");
-      $("yearFrom").insertAdjacentHTML("beforeend", yearOptions);
-      $("yearTo").insertAdjacentHTML("beforeend", yearOptions);
       $("subject").insertAdjacentHTML("beforeend",
         subjects.map((v) => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join(""));
       const sectionCounts = new Map();
@@ -764,25 +777,31 @@
     }
 
     function prepareTagCatalog(taxonomy) {
-      tagCatalog = (taxonomy.tags || [])
+      const yearCatalog = [...new Set(questions.map((question) => question.year))]
+        .map((year) => ({ name: String(year), field: "years" }));
+      tagCatalog = yearCatalog.concat((taxonomy.tags || [])
         .map((tag) => ({
           name: tag.name,
           field: fieldByTagType[tag.type]
         }))
-        .filter((tag) => tag.name && tag.field);
+        .filter((tag) => tag.name && tag.field));
       tagCounts = TagFilters.countByField(questions, tagFields);
+      questions.forEach((question) => {
+        const key = `years\u0000${question.year}`;
+        tagCounts.set(key, (tagCounts.get(key) || 0) + 1);
+      });
     }
 
     function renderTagPanel() {
-      const totalSelected = tagFields.reduce(
-        (total, field) => total + selectedTags[field].length, 0);
+      const totalSelected = indexFields.reduce(
+        (total, field) => total + selectedValuesFor(field).length, 0);
       $("selectedTagCount").textContent =
         totalSelected ? `已选 ${totalSelected} 项` : "未选择";
       $("clearTags").disabled = totalSelected === 0;
 
-      $("tagTabs").innerHTML = tagFields.map((field) => {
+      $("tagTabs").innerHTML = indexFields.map((field) => {
         const config = tagFieldConfig[field];
-        const selectedCount = selectedTags[field].length;
+        const selectedCount = selectedValuesFor(field).length;
         const catalogCount = tagCatalog.filter((tag) => tag.field === field).length;
         const count = selectedCount ? `${selectedCount}/${catalogCount}` : catalogCount;
         return `
@@ -793,8 +812,9 @@
           </button>`;
       }).join("");
 
+      $("tagSearchLabel").textContent = tagFieldConfig[activeTagField].label;
       const needle = normalize($("tagSearch").value);
-      const selected = new Set(selectedTags[activeTagField]);
+      const selected = new Set(selectedValuesFor(activeTagField));
       const visibleTags = tagCatalog
         .filter((tag) =>
           tag.field === activeTagField
@@ -807,6 +827,9 @@
           const selectedOrder =
             Number(selected.has(right.name)) - Number(selected.has(left.name));
           if (selectedOrder) return selectedOrder;
+          if (activeTagField === "years") {
+            return Number(right.name) - Number(left.name);
+          }
           const countOrder =
             (tagCounts.get(`${activeTagField}\u0000${right.name}`) || 0)
             - (tagCounts.get(`${activeTagField}\u0000${left.name}`) || 0);
@@ -845,7 +868,7 @@
       } catch (error) {
         activeKeywordQuery = { positiveGroups: [], excludedTerms: [] };
         filtered = [];
-        activeIndex = 0;
+        activeIndex = -1;
         $("resultCount").textContent = "语法错误";
         $("results").innerHTML =
           `<div class="empty">检索语法错误：${escapeHtml(error.message)}</div>`;
@@ -855,18 +878,25 @@
         syncUrlState(historyMode);
         return;
       }
-      filtered = questions.filter((question) =>
+      const matchedQuestions = questions.filter((question) =>
         matchesSearchConditions(question, conditions));
-      filtered = ResultSort.sort(
-        filtered,
+      const sortedMatches = ResultSort.sort(
+        matchedQuestions,
         conditions.sortMode,
         activePositiveTerms(),
         tagFields,
         canonicalize
       );
-      activeIndex = 0;
+      filtered = conditions.fullPaper
+        ? FullPaper.build(questions, sortedMatches)
+        : sortedMatches;
+      activeIndex = -1;
       renderResults();
-      filtered.length ? renderDetail(filtered[0]) : renderEmpty();
+      if (!filtered.length) {
+        renderEmpty();
+      } else {
+        renderSearchPending();
+      }
       renderTagPanel();
       setMobilePane("results");
       syncUrlState(historyMode);
@@ -921,6 +951,10 @@
     }
 
     function renderResults() {
+      if ($("sectionFilter").value === FullPaper.SECTION_VALUE) {
+        renderPaperResults();
+        return;
+      }
       $("resultCount").textContent = `${filtered.length} 道`;
       if (!filtered.length) {
         $("results").innerHTML = '<div class="empty">没有找到符合条件的真题。<br>可以减少关键词或清空筛选条件。</div>';
@@ -946,6 +980,33 @@
           </button>
           <div class="result-tags">${renderQuestionTags(q)}</div>
         </article>`).join("");
+    }
+
+    function renderPaperResults() {
+      $("resultCount").textContent = `${filtered.length} 份`;
+      if (!filtered.length) {
+        $("results").innerHTML =
+          '<div class="empty">没有找到符合条件的完整试卷。<br>可以调整年份、科目或减少其他筛选条件。</div>';
+        return;
+      }
+      $("results").innerHTML = filtered.map((paper, index) => {
+        const sections = FullPaper.sectionGroups(paper.questions)
+          .map((group) => group.section).join(" · ");
+        return `
+          <article class="result paper-result ${index === activeIndex ? "active" : ""}"
+            data-index="${index}">
+            <button class="result-summary" type="button" data-index="${index}"
+              aria-label="查看 ${escapeHtml(paper.year)} 年${escapeHtml(paper.subject)}完整试卷">
+              <span class="meta">${escapeHtml(paper.year)}</span>
+              <span class="meta">${escapeHtml(paper.subject)}</span>
+              <span class="meta">全卷概览</span>
+              <div class="result-copy">
+                <div class="question">${paper.questions.length} 道题</div>
+                <p class="paper-sections">${escapeHtml(sections)}</p>
+              </div>
+            </button>
+          </article>`;
+      }).join("");
     }
 
     function setActiveResult(nextIndex) {
@@ -1036,9 +1097,64 @@
       $("detail").scrollTop = 0;
     }
 
+    function renderActiveDetail() {
+      const item = filtered[activeIndex];
+      if (!item) {
+        renderEmpty();
+        return;
+      }
+      if ($("sectionFilter").value === FullPaper.SECTION_VALUE) {
+        renderFullPaperDetail(item);
+      } else {
+        renderDetail(item);
+      }
+    }
+
+    function renderFullPaperQuestion(question) {
+      const plainPassage = Boolean(question.passage);
+      return `
+        <article class="paper-question">
+          <div class="paper-question-number">第 ${escapeHtml(question.number ?? "—")} 题</div>
+          ${question.question
+            ? `<p class="paper-question-text">${SearchHighlight.highlight(
+              question.question,
+              activePositiveTerms(),
+              canonicalize,
+              escapeHtml
+            )}</p>`
+            : ""}
+          ${question.passage
+            ? `<div class="paper-passage${plainPassage
+              ? " paper-passage-plain"
+              : ""}">
+                ${plainPassage
+                  ? ""
+                  : '<div class="paper-passage-label">材料</div>'}
+                <p>${SearchHighlight.highlight(
+                  question.passage,
+                  activePositiveTerms(),
+                  canonicalize,
+                  escapeHtml
+                )}</p>
+              </div>`
+            : ""}
+        </article>`;
+    }
+
+    function renderFullPaperDetail(paper) {
+      $("detail").innerHTML =
+        paper.questions.map(renderFullPaperQuestion).join("");
+      $("detail").scrollTop = 0;
+    }
+
     function renderEmpty() {
       $("detail").innerHTML =
         '<div class="empty"><strong>没有匹配结果</strong><br>换一个关键词，或按 Esc 清空全部条件。</div>';
+    }
+
+    function renderSearchPending() {
+      $("detail").innerHTML = '<div class="detail-pending">待 检 索</div>';
+      $("detail").scrollTop = 0;
     }
 
     function setMobilePane(pane) {
@@ -1122,10 +1238,17 @@
       if (!summary) return;
       const nextIndex = Number(summary.dataset.index);
       if (!setActiveResult(nextIndex)) return;
-      renderDetail(filtered[activeIndex]);
+      renderActiveDetail();
       setMobilePane("detail");
     });
     $("detail").addEventListener("click", (event) => {
+      const page = event.target.closest("[data-paper-index]");
+      if (page) {
+        const nextIndex = Number(page.dataset.paperIndex);
+        if (!setActiveResult(nextIndex)) return;
+        renderActiveDetail();
+        return;
+      }
       const tag = event.target.closest("[data-filter-tag]");
       if (!tag) return;
       toggleRecordTag(tag.dataset.filterField, tag.dataset.filterTag);
@@ -1140,12 +1263,12 @@
     $("tagList").addEventListener("click", (event) => {
       const option = event.target.closest("[data-tag]");
       if (!option) return;
-      const values = selectedTags[option.dataset.field];
+      const values = selectedValuesFor(option.dataset.field);
       TagFilters.toggle(values, option.dataset.tag);
       applySearch();
     });
     $("clearTags").addEventListener("click", () => {
-      tagFields.forEach((field) => selectedTags[field].splice(0));
+      indexFields.forEach((field) => selectedValuesFor(field).splice(0));
       applySearch();
     });
     $("tagSearch").addEventListener("input", renderTagPanel);
@@ -1153,21 +1276,7 @@
     $("subject").addEventListener("change", applySearch);
     $("sectionFilter").addEventListener("change", applySearch);
     $("sortMode").addEventListener("change", applySearch);
-    $("yearFrom").addEventListener("change", () => {
-      const from = Number($("yearFrom").value);
-      const to = Number($("yearTo").value);
-      if (from && to && from > to) $("yearTo").value = String(from);
-      applySearch();
-    });
-    $("yearTo").addEventListener("change", () => {
-      const from = Number($("yearFrom").value);
-      const to = Number($("yearTo").value);
-      if (from && to && to < from) $("yearFrom").value = String(to);
-      applySearch();
-    });
     $("resetStructured").addEventListener("click", () => {
-      $("yearFrom").value = "";
-      $("yearTo").value = "";
       $("subject").value = "";
       $("sectionFilter").value = "";
       $("sortMode").value = "relevance";
@@ -1179,13 +1288,11 @@
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
         $("keyword").value = "";
-        $("yearFrom").value = "";
-        $("yearTo").value = "";
         $("subject").value = "";
         $("sectionFilter").value = "";
         $("sortMode").value = "relevance";
         $("tagSearch").value = "";
-        tagFields.forEach((field) => selectedTags[field].splice(0));
+        indexFields.forEach((field) => selectedValuesFor(field).splice(0));
         applySearch();
         $("keyword").focus();
       }
