@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>中大哲学 · 历年真题检索</title>
+  <link rel="icon" href="data:,">
   <style>
     :root {
       --ink: #173b73;
@@ -502,7 +503,10 @@
       <h1>中大哲学 · 历年真题</h1>
       <span class="count-badge" id="total">载入中</span>
     </div>
-    <p>关键词语法：空格表示 AND，OR 表示任选，引号用于精确匹配短语，- 后接关键词表示排除</p>
+    <nav class="primary-nav" aria-label="主要页面">
+      <a class="active" href="search.html" aria-current="page"><span>真题检索</span></a>
+      <a href="statistics.html"><span>考点统计</span></a>
+    </nav>
   </header>
 
   <main>
@@ -1324,7 +1328,7 @@
           get state() { return captureUrlState(); }
         };
         prepareTagCatalog(taxonomy);
-        $("total").textContent = `${questions.length} 道题`;
+        $("total").textContent = `${questions.length} 题`;
         populateFilters();
         restoreUrlState(UrlState.parse(window.location.search));
         urlStateReady = true;
