@@ -230,7 +230,7 @@ async function main() {
       return value;
     });
     assert.equal(restored.loadedCount, 431);
-    assert.equal(restored.total, "431 道题");
+    assert.equal(restored.total, "431 题");
     assert.ok(restored.resultCount > 0);
     assert.equal(restored.state.keyword, "康德");
     assert.equal(restored.state.subject, "外国哲学史");

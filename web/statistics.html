@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>中大哲学 · 历年考点统计</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="statistics.css?v=23">
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand"><h1>中大哲学 · 历年真题</h1><span id="totalBadge">载入中</span></div>
+    <nav class="primary-nav" aria-label="主要页面">
+      <a href="search.html"><span>真题检索</span></a>
+      <a class="active" href="statistics.html" aria-current="page"><span>考点统计</span></a>
+    </nav>
+  </header>
+
+  <main>
+    <form class="filters" id="filters">
+      <label><span>科目</span><select id="subject"><option value="">全部科目</option></select></label>
+      <div class="year-filter">
+        <span>年份范围</span>
+        <div class="year-selects">
+          <label><span>从</span><select id="yearFrom" aria-label="统计起始年份"></select></label>
+          <i aria-hidden="true">—</i>
+          <label><span>至</span><select id="yearTo" aria-label="统计结束年份"></select></label>
+        </div>
+      </div>
+      <label><span>考点类别</span><select id="tagType"><option value="topic">主题</option><option value="philosopher">人物</option><option value="school">流派</option><option value="period">时期</option><option value="work">著作</option></select></label>
+      <label><span>题型</span><select id="section"><option value="">全部题型</option></select></label>
+      <button type="reset">重置条件</button>
+    </form>
+
+    <section class="summary" aria-label="统计摘要">
+      <div><span>覆盖年份</span><strong id="yearCount">—</strong></div>
+      <div><span>试题总数</span><strong id="questionCount">—</strong></div>
+      <div><span id="tagCountLabel">主题考点</span><strong id="tagCount">—</strong></div>
+      <div><span>当前最高频</span><strong id="topTag">—</strong></div>
+    </section>
+
+    <div class="dashboard">
+      <section class="panel year-panel">
+        <h2 id="yearChartTitle">主题相关试题分布</h2>
+        <p id="yearChartDescription">随上方统计条件更新；点击柱形查看对应年份原题</p>
+        <div class="year-chart" id="yearChart"><div class="year-scroll"><svg role="img" aria-label="年度试题数量柱形图"></svg></div><div class="chart-tooltip" role="tooltip"></div></div>
+      </section>
+      <section class="panel rank-panel">
+        <h2 id="rankingTitle">高频主题</h2>
+        <p>按出现题数排序；点击考点查看全部原题</p>
+        <div class="rank-scroll"><div class="ranking" id="ranking"></div></div>
+      </section>
+      <section class="panel heat-panel">
+        <h2>考点年度热力表</h2>
+        <p>单元格为当年题数，灰度越深表示出现越频繁；点击单元格查看对应原题</p>
+        <div class="heat-scroll"><div class="heat-label-overlay"><span class="heat-overlay-corner"></span><div class="heat-overlay-list" id="heatLabelList"></div></div><div class="heat-grid" id="heatGrid"></div></div>
+      </section>
+    </div>
+    <footer><span>项目来源</span><a href="https://github.com/lemizou/SYSU_Philosophy_Entrance_Exam" target="_blank" rel="noopener noreferrer">GitHub · lemizou/SYSU_Philosophy_Entrance_Exam</a></footer>
+  </main>
+  <script src="statistics.js?v=10"></script>
+  <script src="statistics_page.js?v=17"></script>
+</body>
+</html>
