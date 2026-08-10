@@ -244,7 +244,7 @@ async function main() {
     assert.equal(restored.search, `?${query}`);
     assert.equal(restored.hash, "#entrypoint-test");
     assert.equal(restored.activeResults, 0);
-    assert.equal(restored.detailText, "待 检 索");
+    assert.equal(restored.detailText, "I D L E\u00a0\u00a0\u00a0\u00a0S T A T E");
 
     const filterLayout = await evaluate(`(() => {
       const controls = document.querySelector(".controls");
@@ -321,10 +321,10 @@ async function main() {
           )
         };
       })()`);
-      return value?.detailText === "待 检 索" ? value : null;
+      return value?.detailText === "I D L E\u00a0\u00a0\u00a0\u00a0S T A T E" ? value : null;
     });
     assert.equal(initialEmptySelection.activeResults, 0);
-    assert.equal(initialEmptySelection.detailText, "待 检 索");
+    assert.equal(initialEmptySelection.detailText, "I D L E\u00a0\u00a0\u00a0\u00a0S T A T E");
     assert.equal(initialEmptySelection.activePane, "results");
     assert.equal(initialEmptySelection.pendingColor, "rgb(194, 199, 205)");
     assert.equal(initialEmptySelection.pendingFontSize, "14px");
@@ -360,7 +360,7 @@ async function main() {
     assert.equal(mobile.switcherDisplay, "grid");
     assert.deepEqual(mobile.beforeClick, {
       activeResults: 0,
-      detailText: "待 检 索",
+      detailText: "I D L E\u00a0\u00a0\u00a0\u00a0S T A T E",
       activePane: "results"
     });
     assert.equal(mobile.activePane, "detail");
@@ -423,7 +423,7 @@ async function main() {
       ["外国哲学史", "外国哲学史"]
     );
     assert.equal(pendingOverview.activeResults, 0);
-    assert.equal(pendingOverview.detailText, "待 检 索");
+    assert.equal(pendingOverview.detailText, "I D L E\u00a0\u00a0\u00a0\u00a0S T A T E");
     assert.deepEqual(pendingOverview.selectedYears, ["2025", "2024"]);
 
     await evaluate(`(() => {
@@ -518,6 +518,71 @@ async function main() {
       plainSecondSection.passageFontSize,
       plainSecondSection.questionFontSize
     );
+
+    await cdp.call("Emulation.setDeviceMetricsOverride", {
+      width: 390,
+      height: 844,
+      deviceScaleFactor: 1,
+      mobile: true
+    });
+    await cdp.call("Page.navigate", {
+      url: `http://127.0.0.1:${webPort}/web/statistics.html`
+    });
+    const statisticsPending = await waitUntil(async () => {
+      const value = await evaluate(`(() => {
+        const type = document.getElementById("tagType");
+        const pending = document.getElementById("statisticsPending");
+        if (!type || !pending) return null;
+        return {
+          ready: document.getElementById("yearFrom").options.length > 0,
+          type: type.value,
+          pendingHidden: pending.hidden,
+          pendingText: pending.textContent.trim(),
+          visiblePanels: [...document.querySelectorAll(".dashboard .panel")]
+            .filter((panel) => getComputedStyle(panel).display !== "none").length,
+          questionCount: document.getElementById("questionCount").textContent
+        };
+      })()`);
+      return value?.ready ? value : null;
+    });
+    assert.deepEqual(statisticsPending, {
+      ready: true,
+      type: "",
+      pendingHidden: false,
+      pendingText: "I D L E\u00a0\u00a0\u00a0\u00a0S T A T E",
+      visiblePanels: 0,
+      questionCount: "—"
+    });
+
+    const statisticsRendered = await waitUntil(async () => {
+      const value = await evaluate(`(() => {
+        const type = document.getElementById("tagType");
+        if (type.value !== "topic") {
+          type.value = "topic";
+          type.dispatchEvent(new Event("change", { bubbles: true }));
+        }
+        const bars = document.querySelectorAll("#yearChart .year-bar");
+        if (!bars.length) return null;
+        const svg = document.querySelector("#yearChart svg");
+        const scroller = document.querySelector("#yearChart .year-scroll");
+        return {
+          pendingHidden: document.getElementById("statisticsPending").hidden,
+          visiblePanels: [...document.querySelectorAll(".dashboard .panel")]
+            .filter((panel) => getComputedStyle(panel).display !== "none").length,
+          questionCount: document.getElementById("questionCount").textContent,
+          chartWidth: Math.round(svg.getBoundingClientRect().width),
+          viewportWidth: Math.round(scroller.getBoundingClientRect().width)
+        };
+      })()`);
+      return value;
+    });
+    assert.equal(statisticsRendered.pendingHidden, true);
+    assert.equal(statisticsRendered.visiblePanels, 3);
+    assert.ok(Number(statisticsRendered.questionCount) > 0);
+    assert.ok(
+      Math.abs(statisticsRendered.chartWidth - statisticsRendered.viewportWidth) <= 1
+    );
+    await cdp.call("Emulation.clearDeviceMetricsOverride");
 
     assert.deepEqual(errors, [], `浏览器控制台错误：${errors.join("; ")}`);
     await cdp.call("Browser.close");

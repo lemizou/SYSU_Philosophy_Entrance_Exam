@@ -39,6 +39,7 @@ Chrome 端到端测试会临时启动本地检索服务和无头 Chrome，完成
 | URL 状态恢复 | `url_state_test.js` 和 `browser_e2e_test.js` |
 | 桌面端结果/详情栏调宽 | `browser_e2e_test.js` |
 | 移动端结果/详情切换 | `browser_e2e_test.js` |
+| 统计页初始空闲态、选择标签类别后渲染及移动端图表自适应 | `browser_e2e_test.js` |
 | 网页与命令行结果一致 | `test_web_engine_and_cli_return_identical_ids` |
 | `启动检索.cmd` 正常启动 | `WindowsLauncherTest` |
 | 431 道题全部载入 | 数据校验、真实题库验收和 Chrome 端到端测试 |

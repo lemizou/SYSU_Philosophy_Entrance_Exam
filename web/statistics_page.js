@@ -40,9 +40,9 @@
     const root = $("yearChart"); const scroller = root.querySelector(".year-scroll"); const svg = root.querySelector("svg"); const tip = root.querySelector(".chart-tooltip");
     const viewportWidth = Math.floor(scroller.getBoundingClientRect().width);
     const isMobile = window.matchMedia("(max-width: 720px)").matches;
-    const width = Math.max(isMobile ? 680 : 320, viewportWidth); const height = isMobile ? 156 : 230;
+    const width = isMobile ? Math.max(1, viewportWidth) : Math.max(320, viewportWidth); const height = isMobile ? 156 : 230;
     svg.style.width = `${width}px`;
-    const margin = { top: 14, right: 10, bottom: isMobile ? 32 : 34, left: 38 }; const innerW = width - margin.left - margin.right; const innerH = height - margin.top - margin.bottom;
+    const margin = { top: 14, right: isMobile ? 20 : 10, bottom: isMobile ? 32 : 34, left: isMobile ? 20 : 38 }; const innerW = width - margin.left - margin.right; const innerH = height - margin.top - margin.bottom;
     const max = Math.max(5, Math.ceil(summary.maxYearCount / 5) * 5); const y = (value) => margin.top + innerH - value / max * innerH; const step = innerW / Math.max(1, summary.years.length); const barW = Math.max(5, Math.min(14, step * .56));
     svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
     let html = `<title>年度${label}相关试题数量</title><desc>当前统计条件下，每年具有${label}标签的试题数量。</desc>`;
@@ -54,8 +54,20 @@
     svg.querySelectorAll(".year-bar").forEach((bar) => { bar.addEventListener("click", () => location.href = searchUrl({ year: bar.dataset.year })); bar.addEventListener("mouseenter", () => { bar.classList.add("active"); const box = bar.getBoundingClientRect(); const parent = root.getBoundingClientRect(); tip.innerHTML = `<strong>${bar.dataset.year} 年</strong>${bar.dataset.value} 道具有${label}标签的试题`; tip.style.left = `${box.left-parent.left+box.width/2}px`; tip.style.top = `${box.top-parent.top-4}px`; tip.style.opacity = "1"; }); bar.addEventListener("mouseleave", () => { bar.classList.remove("active"); tip.style.opacity = "0"; }); });
   }
 
+  function renderPending() {
+    $("statisticsPending").hidden = false;
+    document.querySelectorAll(".dashboard .panel").forEach((panel) => { panel.hidden = true; });
+    $("yearCount").textContent = "—"; $("questionCount").textContent = "—"; $("tagCountLabel").textContent = "考点数量"; $("tagCount").textContent = "—"; $("topTag").textContent = "—";
+    $("yearChartTitle").textContent = "考点相关试题分布"; $("rankingTitle").textContent = "高频考点";
+    $("yearChart").querySelector("svg").innerHTML = ""; $("ranking").innerHTML = ""; $("heatGrid").innerHTML = ""; $("heatLabelList").innerHTML = "";
+  }
+
   function render() {
-    const type = $("tagType").value; const label = TYPE_LABELS[type]; const summary = ExamStatistics.summarize(questions, type, currentFilters());
+    const type = $("tagType").value;
+    if (!type) { renderPending(); return; }
+    $("statisticsPending").hidden = true;
+    document.querySelectorAll(".dashboard .panel").forEach((panel) => { panel.hidden = false; });
+    const label = TYPE_LABELS[type]; const summary = ExamStatistics.summarize(questions, type, currentFilters());
     $("yearChartTitle").textContent = `${label}相关试题分布`;
     $("yearChartDescription").textContent = `随上方统计条件更新；柱形按具有${label}标签的试题去重计数，点击查看对应年份原题`;
     $("yearCount").textContent = summary.years.length; $("questionCount").textContent = summary.filtered.length; $("tagCountLabel").textContent = `${label}考点`; $("tagCount").textContent = summary.tagCount; $("topTag").textContent = summary.ranking[0]?.name || "—"; $("rankingTitle").textContent = `高频${label}`;
@@ -85,7 +97,7 @@
     $("yearFrom").value = years[0]; $("yearTo").value = years.at(-1);
     $("filters").addEventListener("change", (event) => { keepYearRangeValid(event.target.id); render(); });
     $("filters").addEventListener("reset", () => setTimeout(() => { $("yearFrom").value = years[0]; $("yearTo").value = years.at(-1); render(); }));
-    new ResizeObserver(() => { const type = $("tagType").value; const summary = ExamStatistics.summarize(questions, type, currentFilters()); drawYearChart(summary, TYPE_LABELS[type]); }).observe($("yearChart"));
+    new ResizeObserver(() => { const type = $("tagType").value; if (!type) return; const summary = ExamStatistics.summarize(questions, type, currentFilters()); drawYearChart(summary, TYPE_LABELS[type]); }).observe($("yearChart"));
     render();
   }).catch(() => { $("totalBadge").textContent = "载入失败"; $("ranking").innerHTML = '<span class="empty">无法读取题库数据，请通过本地服务器或公开网站访问。</span>'; });
 })();
