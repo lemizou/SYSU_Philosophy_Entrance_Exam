@@ -1,2 +1,9 @@
 __pycache__/
 *.py[cod]
+
+# Supabase CLI and local credentials
+.env
+.env.*
+!.env.example
+supabase/.branches/
+supabase/.temp/

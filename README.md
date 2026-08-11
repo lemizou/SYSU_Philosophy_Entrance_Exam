@@ -94,10 +94,15 @@ python tests/run_all.py
 data/       真题与标签数据
 docs/       检索、分类、校对、测试及路线图文档
 src/        Python 检索、校验和本地网页启动工具
+supabase/   用户后端的数据库迁移与安全检查
 tests/      Python、JavaScript 与浏览器端到端测试
 web/        静态检索网页
 index.html  GitHub Pages 项目入口
 ```
+
+Supabase 第一版后端的数据结构、安全边界、部署步骤和后续前端调用契约见
+[Supabase 第一版后端](docs/supabase-backend.md)。当前网页尚未加载后端客户端，现有
+检索与统计功能不受影响。
 
 ## 当前状态与后续计划
 
