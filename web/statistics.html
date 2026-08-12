@@ -42,17 +42,17 @@
 
     <div class="dashboard">
       <div class="statistics-pending" id="statisticsPending">I D L E&nbsp;&nbsp;&nbsp;&nbsp;S T A T E</div>
-      <section class="panel year-panel">
+      <section class="panel year-panel" hidden>
         <h2 id="yearChartTitle">考点相关试题分布</h2>
         <p id="yearChartDescription">随上方统计条件更新；点击柱形查看对应年份原题</p>
         <div class="year-chart" id="yearChart"><div class="year-scroll"><svg role="img" aria-label="年度试题数量柱形图"></svg></div><div class="chart-tooltip" role="tooltip"></div><small class="year-chart-note">点击柱形可跳转查看对应年份原题</small></div>
       </section>
-      <section class="panel rank-panel">
+      <section class="panel rank-panel" hidden>
         <h2 id="rankingTitle">高频考点</h2>
         <p>按出现题数排序；点击考点查看全部原题</p>
         <div class="rank-scroll"><div class="ranking" id="ranking"></div></div>
       </section>
-      <section class="panel heat-panel">
+      <section class="panel heat-panel" hidden>
         <h2>考点年度热力表</h2>
         <p>单元格为当年题数，灰度越深表示出现越频繁；点击单元格查看对应原题</p>
         <div class="heat-scroll"><div class="heat-label-overlay"><span class="heat-overlay-corner"></span><div class="heat-overlay-list" id="heatLabelList"></div></div><div class="heat-grid" id="heatGrid"></div></div>
