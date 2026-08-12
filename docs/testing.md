@@ -15,6 +15,10 @@ python tests/run_all.py
 3. JavaScript 检索、排序、高亮、标签与 URL 状态测试；
 4. Chrome 端到端测试。
 
+`user_backend_test.js` 使用模拟邮箱会话验证验证码请求、登录会话持久化、带身份的
+笔记 upsert，以及清空笔记后的删除请求。远程验收还需要真实 publishable key 和一个
+可以接收验证码的测试邮箱。
+
 Chrome 端到端测试会临时启动本地检索服务和无头 Chrome，完成后自动关闭，
 不会修改浏览器个人资料。Windows 还会通过 `启动检索.cmd --smoke-test`
 验证启动脚本能够启动服务并读取页面和题库。
@@ -34,7 +38,7 @@ Chrome 端到端测试会临时启动本地检索服务和无头 Chrome，完成
 | 年份、科目、题型组合 | `test_year_subject_section_combination_and_no_result` |
 | 年份索引多选与旧年份区间链接兼容 | `url_state_test.js` 和 `browser_e2e_test.js` |
 | 全卷概览的筛选、分卷与原始题序 | `full_paper_test.js` 和 `browser_e2e_test.js` |
-| 空条件 | `test_all_431_questions_load_and_empty_conditions_return_all` |
+| 空条件 | 网页初始及重置后显示 `IDLE STATE`，不自动列出全部题目；`browser_e2e_test.js` 验证该交互，`test_all_431_questions_load_and_empty_conditions_return_all` 验证底层检索语义 |
 | 无结果 | `test_year_subject_section_combination_and_no_result` |
 | URL 状态恢复 | `url_state_test.js` 和 `browser_e2e_test.js` |
 | 桌面端结果/详情栏调宽 | `browser_e2e_test.js` |

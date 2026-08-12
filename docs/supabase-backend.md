@@ -1,7 +1,7 @@
 # Supabase 第一版后端
 
-本阶段只建立后端，不加载 Supabase JavaScript 客户端，也不改变现有网页。题目内容
-仍以 `data/questions.json` 为唯一来源；后端仅用稳定的 `question_id` 关联用户数据。
+题目内容仍以 `data/questions.json` 为唯一来源；后端仅用稳定的 `question_id` 关联
+用户数据。个人档案页通过小型 REST 客户端连接 Supabase，不引入第三方 CDN 脚本。
 
 远程项目已部署到 Supabase 东京区域，项目 URL 为
 `https://vplsugmumjpfjhyhhsvo.supabase.co`。邮箱登录、生产站点地址和本地回调地址
@@ -52,6 +52,24 @@ select id from auth.users where email = 'ADMIN_EMAIL';
 4. 在 SQL Editor 执行 `supabase/migrations/202608110001_initial_user_backend.sql`。
 5. 在一次性或测试项目中执行 `supabase/tests/security_smoke.sql`。
 6. 查看 Security Advisor，确认没有未启用 RLS 的公开表或危险函数授权。
+7. 在 Project Settings → API Keys 创建或复制 `sb_publishable_*` key，填入
+   `web/supabase-config.js`。不要在此处使用 `sb_secret_*` 或 `service_role` key。
+
+如果 key 仍为占位值，个人档案页会禁用邮箱输入并明确显示配置错误，不会假装登录或
+保存成功。
+
+Supabase 自带邮件服务只适合初期试用，并有很低的项目级发送频率限制。公开发布前应在
+Authentication → Email 中配置自有 SMTP；否则连续登录会收到 `email rate limit
+exceeded`。SMTP 密码只保存在 Supabase 控制台，不进入仓库或前端配置。
+
+## 前端登录与会话
+
+- 邮箱登录同时支持六位验证码和邮件 Magic Link；
+- 浏览器只持久化当前用户的 access/refresh token，并在到期前刷新；
+- Magic Link 回跳后立即从地址栏移除 token；
+- 退出时同时注销远程会话并清理本机会话；
+- 所有 Data API 请求都携带当前 access token，由 RLS 决定可访问的行；
+- 笔记保存成功必须以 Data API 成功响应为准，失败时显示“保存失败”。
 
 Security Advisor 会提示三个登录用户可执行的 `security definer` RPC：
 `record_recent_view`、`record_activity` 和 `get_activity_metrics`。这是预期设计；前两个

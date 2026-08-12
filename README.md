@@ -101,8 +101,10 @@ index.html  GitHub Pages 项目入口
 ```
 
 Supabase 第一版后端的数据结构、安全边界、部署步骤和后续前端调用契约见
-[Supabase 第一版后端](docs/supabase-backend.md)。当前网页尚未加载后端客户端，现有
-检索与统计功能不受影响。
+[Supabase 第一版后端](docs/supabase-backend.md)。个人档案页已接入邮箱验证码或
+Magic Link 登录、私人数据读取和笔记自动保存。部署前需要把
+`web/supabase-config.js` 中的占位值替换为项目的 `sb_publishable_*` key；该 key
+可以公开，但数据库仍必须依靠 RLS 保护用户数据。
 
 ## 当前状态与后续计划
 

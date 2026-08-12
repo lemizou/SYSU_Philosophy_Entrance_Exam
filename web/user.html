@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>中大哲学 · 个人档案</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="user.css?v=12">
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <h1>中大哲学 · 历年真题</h1>
+    </div>
+    <nav class="primary-nav" aria-label="主要页面">
+      <a href="search.html"><span>真题检索</span></a>
+      <a href="statistics.html"><span>考点统计</span></a>
+      <a class="active" href="user.html" aria-current="page"><span>个人档案</span></a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="ledger" aria-label="学习摘要">
+      <div><span>已收藏</span><strong id="favoriteCount">—</strong><small>道题</small></div>
+      <div><span>笔记</span><strong id="noteCount">—</strong><small>篇</small></div>
+      <div><span>累计学习</span><strong id="activeDayCount">—</strong><small>天</small></div>
+    </section>
+
+    <div class="user-workspace">
+      <aside class="section-index">
+        <p>档案目录</p>
+        <nav aria-label="个人档案栏目">
+          <button class="index-button active" type="button" data-view="overview" aria-pressed="true"><span>概览</span><small>今日</small></button>
+          <button class="index-button" type="button" data-view="favorites" aria-pressed="false"><span>我的收藏</span><small id="favoriteNavCount">—</small></button>
+          <button class="index-button" type="button" data-view="notes" aria-pressed="false"><span>我的笔记</span><small id="noteNavCount">—</small></button>
+          <button class="index-button account-trigger" id="openAuthDialog" type="button" aria-haspopup="dialog"><span>登录</span><small>私人</small></button>
+        </nav>
+        <div class="privacy-note">
+          <strong>私人资料</strong>
+          <p>收藏与笔记默认仅本人可见。</p>
+        </div>
+      </aside>
+
+      <section class="view-panel active" id="overviewView" data-panel="overview">
+        <div class="view-heading">
+          <div><p class="eyebrow">11 AUG 2026</p><h3>今天从这里继续</h3></div>
+        </div>
+
+        <article class="resume-record">
+          <div class="record-date"><strong>11</strong><span>八月</span></div>
+          <div class="record-main">
+            <div class="record-meta"><span>西方哲学史</span><span>2021</span><span>论述题</span></div>
+            <h4>康德的先验统觉</h4>
+            <p>笔记摘要：先验统觉不是经验中的自我观察，而是表象能够统一为“我的表象”的先验条件……</p>
+          </div>
+          <a class="record-action" href="search.html?q=%E5%85%88%E9%AA%8C%E7%BB%9F%E8%A7%89">继续阅读</a>
+        </article>
+
+        <div class="overview-grid">
+          <section class="subsection activity-section">
+            <div class="subsection-heading"><h4>近四周学习记录</h4><span>连续 4 天</span></div>
+            <div class="activity-calendar" id="activityCalendar" aria-label="近四周学习活跃度"></div>
+            <div class="activity-legend"><span>少</span><i></i><i data-level="1"></i><i data-level="2"></i><i data-level="3"></i><span>多</span></div>
+          </section>
+          <section class="subsection focus-section">
+            <div class="subsection-heading"><h4>本周关注</h4><span>按收藏与笔记</span></div>
+            <ol>
+              <li><a href="search.html?tag=%E5%BA%B7%E5%BE%B7"><span>康德</span><b style="--share: 82%"></b><small>8</small></a></li>
+              <li><a href="search.html?tag=%E6%9C%B1%E7%86%B9"><span>朱熹</span><b style="--share: 61%"></b><small>5</small></a></li>
+              <li><a href="search.html?tag=%E7%8E%B0%E8%B1%A1%E5%AD%A6"><span>现象学</span><b style="--share: 42%"></b><small>3</small></a></li>
+            </ol>
+          </section>
+        </div>
+
+      </section>
+
+      <section class="view-panel" id="favoritesView" data-panel="favorites" hidden>
+        <label class="personal-search"><span>检索收藏</span><input type="search" data-personal-search="favorites" autocomplete="off" placeholder="题目、人物或考点"></label>
+        <div class="personal-filter-strip" data-filter-scope="favorites" aria-label="收藏筛选和排序">
+          <div class="personal-filter-title">检索条件</div>
+          <label class="personal-filter-control"><span>题型</span><select data-filter-field="section"><option value="">全部题型</option><option value="第一类">第一类</option><option value="第二类">第二类</option><option value="第三类">第三类</option></select></label>
+          <label class="personal-filter-control"><span>科目</span><select data-filter-field="subject"><option value="">全部科目</option><option value="中国哲学史">中国哲学史</option><option value="外国哲学史">外国哲学史</option></select></label>
+          <label class="personal-filter-control"><span>结果排序</span><select data-filter-field="sort"><option value="relevance">相关度</option><option value="year_desc">年份从新到旧</option><option value="year_asc">年份从旧到新</option></select></label>
+          <button class="reset-personal-filters" type="button">重置条件</button>
+        </div>
+        <div class="archive-list" id="favoriteList">
+          <p class="filter-empty">登录后显示你的收藏。</p>
+        </div>
+      </section>
+
+      <section class="view-panel" id="notesView" data-panel="notes" hidden>
+        <span id="saveStatus" aria-live="polite" hidden>所有更改已保存</span>
+        <label class="personal-search"><span>检索笔记</span><input id="noteSearch" type="search" data-personal-search="notes" autocomplete="off" placeholder="题目、人物或考点"></label>
+        <div class="personal-filter-strip" data-filter-scope="notes" aria-label="笔记筛选和排序">
+          <div class="personal-filter-title">检索条件</div>
+          <label class="personal-filter-control"><span>题型</span><select data-filter-field="section"><option value="">全部题型</option><option value="第一类">第一类</option><option value="第二类">第二类</option><option value="第三类">第三类</option></select></label>
+          <label class="personal-filter-control"><span>科目</span><select data-filter-field="subject"><option value="">全部科目</option><option value="中国哲学史">中国哲学史</option><option value="外国哲学史">外国哲学史</option></select></label>
+          <label class="personal-filter-control"><span>结果排序</span><select data-filter-field="sort"><option value="relevance">相关度</option><option value="year_desc">年份从新到旧</option><option value="year_asc">年份从旧到新</option></select></label>
+          <button class="reset-personal-filters" type="button">重置条件</button>
+        </div>
+        <div class="note-workspace">
+          <div class="note-index">
+            <div class="note-results" id="noteResults">
+              <p class="note-empty">登录后显示你的笔记。</p>
+            </div>
+          </div>
+          <div class="note-editor">
+            <p id="noteMeta">尚未选择题目</p>
+            <h4 id="noteTitle">私人笔记</h4>
+            <label for="noteContent">私人笔记</label>
+            <textarea id="noteContent" disabled placeholder="登录并选择一篇笔记后编辑"></textarea>
+            <div class="editor-footer"><small>支持基础 Markdown · 自动保存到私人后端</small><button type="button" id="saveNote" disabled>保存笔记</button></div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <footer><span>项目来源</span><a href="https://github.com/lemizou/SYSU_Philosophy_Entrance_Exam" target="_blank" rel="noopener noreferrer">GitHub · lemizou/SYSU_Philosophy_Entrance_Exam</a></footer>
+  </main>
+  <dialog class="auth-dialog" id="authDialog" aria-labelledby="authTitle">
+    <button class="dialog-close" id="closeAuthDialog" type="button" aria-label="关闭登录窗口">×</button>
+    <div class="auth-card" id="authCard">
+      <div>
+        <p class="eyebrow">PRIVATE ARCHIVE</p>
+        <h2 id="authTitle">邮箱登录</h2>
+        <p id="authMessage">登录后，收藏和笔记会安全保存到你的私人档案。</p>
+      </div>
+      <form id="emailLoginForm">
+        <label for="loginEmail">1. 填写邮箱并获取验证码</label>
+        <div class="auth-row"><input id="loginEmail" name="email" type="email" autocomplete="email" required placeholder="you@example.com"><button type="submit">发送验证码</button></div>
+      </form>
+      <form id="otpForm">
+        <label for="loginOtp">2. 填写邮件中的验证码</label>
+        <div class="auth-row"><input id="loginOtp" name="otp" inputmode="numeric" autocomplete="one-time-code" required placeholder="请先发送验证码" disabled><button type="submit" disabled>登录</button></div>
+      </form>
+      <div class="session-row" id="sessionRow" hidden><span id="sessionEmail"></span><button id="signOut" type="button">退出登录</button></div>
+    </div>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="supabase-config.js?v=2"></script>
+  <script src="user_backend.js?v=1"></script>
+  <script src="user.js?v=9"></script>
+</body>
+</html>
