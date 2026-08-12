@@ -890,18 +890,37 @@ footer a:hover {
   .filter-control select,
   .reset-structured {
     width: 100%;
-    min-height: 26px;
-    padding: 0 14px 0 5px;
+    height: 24px;
+    min-height: 24px;
+    box-sizing: border-box;
+    padding: 0 5px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    -webkit-appearance: none;
+    appearance: none;
     font-size: 8px;
+    line-height: 22px;
   }
 
   .filter-control select {
     display: block;
+    padding-right: 18px;
+    background-color: var(--white);
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+      linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+    background-position:
+      calc(100% - 9px) 10px,
+      calc(100% - 6px) 10px;
+    background-repeat: no-repeat;
+    background-size: 3px 3px;
   }
 
   .reset-structured {
     align-self: start;
-    padding-inline: 5px;
+    display: block;
+    background: transparent;
+    color: var(--muted);
   }
 
   .search-layout {
