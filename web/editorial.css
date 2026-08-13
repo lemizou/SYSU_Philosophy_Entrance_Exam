@@ -1334,7 +1334,7 @@ footer a:hover {
   display: grid;
   grid-template-columns: 58px minmax(0, 1fr);
   gap: 4px 14px;
-  padding: 15px 0;
+  padding: 10px 0;
   border-bottom: 1px solid #edf0f3;
 }
 
@@ -1346,7 +1346,7 @@ footer a:hover {
 }
 
 .detail .paper-question-text {
-  font-size: 13px;
+  font-size: 15.2px;
   line-height: 1.8;
 }
 
@@ -1416,6 +1416,14 @@ footer a:hover {
 }
 
 @media (max-width: 720px) {
+  .paper-question {
+    padding: 8px 0;
+  }
+
+  .detail .paper-question-text {
+    font-size: 16.15px;
+  }
+
   .detail .detail-material p,
   .detail .paper-passage p,
   .detail .paper-passage.paper-passage-plain p {
