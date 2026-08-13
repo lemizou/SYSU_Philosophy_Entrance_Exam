@@ -102,8 +102,7 @@
         return session.user?.id ? session.user : backend.hydrateUser();
       },
       requestOtp(email) {
-        const redirectTo = String(location?.href || "").split("#")[0];
-        return backend.requestOtp(email, redirectTo);
+        return backend.requestOtp(email);
       },
       verifyOtp: (email, token) => backend.verifyOtp(email, token),
       async signOut() {
@@ -176,7 +175,7 @@
         otpInput.disabled = false;
         otpInput.placeholder = "6 位验证码";
         otpForm.querySelector("button").disabled = false;
-        setMessage(`验证码已发送至 ${pendingEmail}。也可以直接点击邮件中的登录链接。`);
+        setMessage(`六位验证码已发送至 ${pendingEmail}，请在当前窗口输入验证码登录。`);
         otpInput.focus();
       } catch (error) {
         setMessage(error.message || "验证码发送失败", true);
