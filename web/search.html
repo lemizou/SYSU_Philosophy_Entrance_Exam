@@ -433,8 +433,6 @@
     .study-action-primary:hover:not(:disabled) { background: var(--ink-dark); color: white; }
     .study-action:disabled { cursor: wait; opacity: .58; }
     .study-action-icon { display: inline-block; width: 14px; margin-right: 3px; text-align: center; }
-    .study-action-status { margin-left: auto; color: var(--muted); font-size: 10px; }
-    .study-action-status.error { color: var(--accent); }
     .question-note-editor {
       margin: -13px 0 21px;
       padding: 14px;
@@ -533,7 +531,6 @@
       .filter-strip { grid-template-columns: 1fr; }
       .study-actions { flex-wrap: wrap; }
       .study-action { flex: 1 1 calc(50% - 4px); padding-inline: 8px; }
-      .study-action-status { width: 100%; margin-left: 0; text-align: center; }
       .question-note-editor { padding: 12px; }
       .note-editor-foot { flex-wrap: wrap; }
       .note-editor-hint { width: 100%; }
@@ -545,7 +542,7 @@
     }
   </style>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="editorial.css?v=38">
+  <link rel="stylesheet" href="editorial.css?v=45">
   <link rel="stylesheet" href="auth.css?v=1">
 </head>
 <body>
@@ -682,7 +679,8 @@
   <script src="supabase-config.js?v=2"></script>
   <script src="user_backend.js?v=2"></script>
   <script src="auth_controller.js?v=1"></script>
-  <script src="question_actions.js?v=1"></script>
+  <script src="page_memory.js?v=1"></script>
+  <script src="question_actions.js?v=2"></script>
   <script src="note_editor.js?v=1"></script>
   <script>
     const $ = (id) => document.getElementById(id);
@@ -709,6 +707,9 @@
     let questionAuthUi = null;
     let questionActions = null;
     let questionNoteEditor = null;
+    const SEARCH_PANE_STORAGE_KEY = "sysu-search-mobile-pane-v1";
+    const SEARCH_TAG_FIELD_STORAGE_KEY = "sysu-search-tag-field-v1";
+    const SEARCH_SPLIT_STORAGE_KEY = "sysu-search-pane-split-v1";
 
     async function openQuestionNote(action) {
       if (activeQuestionId !== action.questionId) {
@@ -896,9 +897,11 @@
           ...new Set(restoredTags)
         );
       }
-      activeTagField =
-        indexFields.find((field) => selectedValuesFor(field).length)
-        || "years";
+      const selectedField = indexFields.find((field) => selectedValuesFor(field).length);
+      let rememberedField = "";
+      try { rememberedField = localStorage.getItem(SEARCH_TAG_FIELD_STORAGE_KEY) || ""; } catch (_) {}
+      activeTagField = selectedField
+        || (indexFields.includes(rememberedField) ? rememberedField : "years");
       $("tagSearch").value = "";
     }
 
@@ -1377,7 +1380,6 @@
             <span class="study-action-icon" data-favorite-icon aria-hidden="true">☆</span><span data-favorite-label>收藏</span>
           </button>
           <button class="study-action study-action-primary" type="button" data-note-action aria-expanded="false" aria-controls="questionNoteEditor">笔记</button>
-          <span class="study-action-status" data-question-action-status role="status" aria-live="polite" hidden></span>
         </div>
         <section class="question-note-editor" id="questionNoteEditor" data-question-note data-question-id="${escapeHtml(q.id)}" aria-label="题目笔记" hidden>
           <div class="note-editor-head">
@@ -1394,7 +1396,7 @@
             </div>
           </div>
           <div class="note-editor-foot">
-            <span class="note-editor-hint" id="questionNoteHint">草稿先保存在本机；登录后可跨设备同步。</span>
+            <span class="note-editor-hint" id="questionNoteHint">草稿先保存在本机；登录后可跨设备同步，文字自动保存。</span>
             <span class="note-editor-count" id="questionNoteCount" data-note-count>0 / 50,000</span>
             <button class="note-editor-button note-editor-delete" type="button" data-note-delete hidden>删除云端笔记</button>
             <button class="note-editor-button note-editor-sync" type="button" data-note-sync>登录并同步</button>
@@ -1500,7 +1502,7 @@
       $("detail").scrollTop = 0;
     }
 
-    function setMobilePane(pane) {
+    function setMobilePane(pane, remember = true) {
       const workspace = document.querySelector(".workspace");
       const nextPane = pane === "detail" ? "detail" : "results";
       workspace.dataset.mobilePane = nextPane;
@@ -1510,6 +1512,9 @@
           String(button.dataset.paneButton === nextPane)
         );
       });
+      if (remember) {
+        try { localStorage.setItem(SEARCH_PANE_STORAGE_KEY, nextPane); } catch (_) {}
+      }
     }
 
     const paneResizer = $("paneResizer");
@@ -1519,11 +1524,21 @@
     const maxPaneSplit = 68;
     let paneSplit = defaultPaneSplit;
 
-    function setPaneSplit(percent) {
+    function setPaneSplit(percent, remember = true) {
       paneSplit = Math.min(maxPaneSplit, Math.max(minPaneSplit, percent));
       workspace.style.setProperty("--results-share", `${paneSplit}%`);
       paneResizer.setAttribute("aria-valuenow", String(Math.round(paneSplit)));
+      if (remember) {
+        try { localStorage.setItem(SEARCH_SPLIT_STORAGE_KEY, String(paneSplit)); } catch (_) {}
+      }
     }
+
+    try {
+      const rememberedSplit = Number(localStorage.getItem(SEARCH_SPLIT_STORAGE_KEY));
+      if (Number.isFinite(rememberedSplit) && rememberedSplit >= minPaneSplit && rememberedSplit <= maxPaneSplit) {
+        setPaneSplit(rememberedSplit, false);
+      }
+    } catch (_) {}
 
     function paneSplitFromPointer(clientX) {
       const bounds = workspace.getBoundingClientRect();
@@ -1613,6 +1628,7 @@
       const tab = event.target.closest("[data-field]");
       if (!tab || !tagFieldConfig[tab.dataset.field]) return;
       activeTagField = tab.dataset.field;
+      try { localStorage.setItem(SEARCH_TAG_FIELD_STORAGE_KEY, activeTagField); } catch (_) {}
       $("tagSearch").value = "";
       renderTagPanel();
     });
@@ -1691,8 +1707,14 @@
         prepareTagCatalog(taxonomy);
         populateFilters();
         restoreUrlState(UrlState.parse(window.location.search));
+        const hasExplicitDetail = new URLSearchParams(window.location.search).has("question");
+        let rememberedPane = "";
+        try { rememberedPane = localStorage.getItem(SEARCH_PANE_STORAGE_KEY) || ""; } catch (_) {}
         urlStateReady = true;
         applySearch({ historyMode: "replace", restoreQuestion: true });
+        if (!hasExplicitDetail && (rememberedPane === "results" || rememberedPane === "detail")) {
+          setMobilePane(rememberedPane);
+        }
         $("keyword").focus();
       })
       .catch((error) => {

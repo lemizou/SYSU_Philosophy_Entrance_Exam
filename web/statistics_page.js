@@ -6,6 +6,7 @@
   showTopFilters();
   const TYPE_LABELS = { topic: "主题", philosopher: "人物", school: "流派", period: "时期", work: "著作" };
   const TYPE_PARAMS = { topic: "topic", philosopher: "person", school: "school", period: "period", work: "work" };
+  const FILTER_STORAGE_KEY = "sysu-statistics-filters-v1";
   const $ = (id) => document.getElementById(id);
   let questions = [];
 
@@ -30,6 +31,27 @@
       yearFrom: $("yearFrom").value,
       yearTo: $("yearTo").value
     };
+  }
+
+  function saveFilters() {
+    try {
+      localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify({
+        ...currentFilters(),
+        tagType: $("tagType").value
+      }));
+    } catch (_) {}
+  }
+
+  function restoreFilters() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(FILTER_STORAGE_KEY) || "null");
+      if (!saved) return;
+      for (const id of ["subject", "section", "yearFrom", "yearTo", "tagType"]) {
+        const value = String(saved[id] ?? "");
+        if ([...$(id).options].some((option) => option.value === value)) $(id).value = value;
+      }
+      keepYearRangeValid("yearFrom");
+    } catch (_) {}
   }
 
   function keepYearRangeValid(changedId) {
@@ -99,8 +121,9 @@
     const years = [...new Set(questions.map((q) => q.year))].sort((a, b) => a - b);
     years.forEach((year) => { $("yearFrom").add(new Option(year, year)); $("yearTo").add(new Option(year, year)); });
     $("yearFrom").value = years[0]; $("yearTo").value = years.at(-1);
-    $("filters").addEventListener("change", (event) => { keepYearRangeValid(event.target.id); render(); });
-    $("filters").addEventListener("reset", () => setTimeout(() => { $("yearFrom").value = years[0]; $("yearTo").value = years.at(-1); render(); }));
+    restoreFilters();
+    $("filters").addEventListener("change", (event) => { keepYearRangeValid(event.target.id); saveFilters(); render(); });
+    $("filters").addEventListener("reset", () => setTimeout(() => { $("yearFrom").value = years[0]; $("yearTo").value = years.at(-1); saveFilters(); render(); }));
     new ResizeObserver(() => { const type = $("tagType").value; if (!type) return; const summary = ExamStatistics.summarize(questions, type, currentFilters()); drawYearChart(summary, TYPE_LABELS[type]); }).observe($("yearChart"));
     render();
   }).catch(() => { $("ranking").innerHTML = '<span class="empty">无法读取题库数据，请通过本地服务器或公开网站访问。</span>'; });

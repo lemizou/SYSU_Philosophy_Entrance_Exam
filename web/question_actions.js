@@ -48,9 +48,11 @@
       noteButton.textContent = state.loading
         ? "读取中…"
         : "笔记";
-      status.textContent = state.message;
-      status.hidden = !state.message;
-      status.classList.toggle("error", state.error);
+      if (status) {
+        status.textContent = state.message;
+        status.hidden = !state.message;
+        status.classList.toggle("error", state.error);
+      }
     }
 
     function noteReturnUrl(questionId) {

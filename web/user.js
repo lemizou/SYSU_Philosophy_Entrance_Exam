@@ -12,6 +12,8 @@
   let saveTimer = null;
   let personalSearchAliases = window.ConceptAliases.create([]);
   let personalSearchReady = false;
+  const VIEW_STORAGE_KEY = "sysu-user-active-view-v1";
+  const VALID_VIEWS = new Set(["overview", "favorites", "notes"]);
 
   function showToast(message, isError = false) {
     toast.textContent = message;
@@ -21,7 +23,8 @@
     toastTimer = setTimeout(() => toast.classList.remove("visible"), 2600);
   }
 
-  function showView(view) {
+  function showView(view, remember = true) {
+    if (!VALID_VIEWS.has(view)) view = "overview";
     document.querySelectorAll("[data-view]").forEach((button) => {
       const active = button.dataset.view === view;
       button.classList.toggle("active", active);
@@ -32,7 +35,15 @@
       panel.hidden = !active;
       panel.classList.toggle("active", active);
     });
+    if (remember) {
+      try { localStorage.setItem(VIEW_STORAGE_KEY, view); } catch (_) {}
+    }
   }
+
+  try {
+    const savedView = localStorage.getItem(VIEW_STORAGE_KEY);
+    if (VALID_VIEWS.has(savedView)) showView(savedView, false);
+  } catch (_) {}
 
   document.querySelectorAll("[data-view]").forEach((button) =>
     button.addEventListener("click", () => showView(button.dataset.view)));
@@ -172,10 +183,14 @@
       const item = document.createElement("article");
       item.dataset.originalOrder = String(index);
       item.dataset.searchId = `favorite-${row.question_id}`;
-      item.dataset.search = `${question.question} ${question.subject} ${(question.philosophers || []).join(" ")}`;
+      item.dataset.search = `${question.question} ${question.passage || ""} ${question.subject} ${(question.philosophers || []).join(" ")}`;
       item.dataset.subject = question.subject;
       item.dataset.section = question.section;
       item.dataset.year = question.year;
+      const link = document.createElement("a");
+      link.className = "favorite-card-link";
+      link.href = `search.html?question=${encodeURIComponent(row.question_id)}`;
+      link.setAttribute("aria-label", `查看原题：${question.question}`);
       const mark = document.createElement("div");
       mark.className = "archive-mark";
       mark.textContent = `F.${String(rows.length - index).padStart(3, "0")}`;
@@ -183,12 +198,10 @@
       const meta = document.createElement("p");
       meta.textContent = `${question.subject} · ${question.year} · ${question.section}`;
       const title = document.createElement("h4");
-      title.textContent = question.question;
+      title.textContent = `${question.question}${question.passage || ""}`;
       details.append(meta, title);
-      const link = document.createElement("a");
-      link.href = `search.html?question=${encodeURIComponent(row.question_id)}`;
-      link.textContent = "查看原题";
-      item.append(mark, details, link);
+      link.append(mark, details);
+      item.append(link);
       list.insertBefore(item, empty);
     });
     applyFavoriteFilters();
