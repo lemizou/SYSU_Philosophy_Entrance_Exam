@@ -411,6 +411,66 @@
       font: 700 21px/1.4 SimSun, "STSong", serif;
     }
     .detail .subline { margin: 0 0 24px; color: var(--muted); font-size: 13px; }
+    .study-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 4px 0 21px;
+      padding: 0;
+    }
+    .study-action {
+      min-height: 34px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      background: white;
+      color: var(--ink);
+      font-size: 11px;
+      font-weight: 400;
+    }
+    .study-action:hover:not(:disabled) { border-color: var(--ink); background: var(--pale); }
+    .study-action[data-state="saved"] { border-color: var(--ink); background: var(--pale); }
+    .study-action-primary { border-color: var(--ink); background: var(--ink); color: white; }
+    .study-action-primary:hover:not(:disabled) { background: var(--ink-dark); color: white; }
+    .study-action:disabled { cursor: wait; opacity: .58; }
+    .study-action-icon { display: inline-block; width: 14px; margin-right: 3px; text-align: center; }
+    .study-action-status { margin-left: auto; color: var(--muted); font-size: 10px; }
+    .study-action-status.error { color: var(--accent); }
+    .question-note-editor {
+      margin: -13px 0 21px;
+      padding: 14px;
+      border: 1px solid var(--ink);
+      background: #fbfaf7;
+    }
+    .note-editor-head, .note-editor-foot, .note-conflict-actions {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+    .note-editor-head { margin-bottom: 9px; }
+    .note-editor-title { font: 700 13px/1.4 SimSun, "STSong", serif; }
+    .note-editor-status { margin-left: auto; color: var(--muted); font-size: 10px; }
+    .note-editor-status.error { color: var(--accent); }
+    .note-editor-close { border: 0; padding: 2px 0 2px 8px; background: transparent; color: var(--muted); font-size: 10px; }
+    .note-editor-content {
+      display: block;
+      width: 100%;
+      min-height: 132px;
+      resize: vertical;
+      padding: 10px 11px;
+      border: 1px solid var(--line);
+      background: white;
+      color: var(--ink);
+      font: 13px/1.7 inherit;
+    }
+    .note-editor-content:focus { outline: 1px solid var(--ink); border-color: var(--ink); }
+    .note-editor-foot { margin-top: 9px; }
+    .note-editor-hint { color: var(--muted); font-size: 9px; }
+    .note-editor-count { color: var(--muted); font: 9px ui-monospace, Consolas, monospace; }
+    .note-editor-button { min-height: 30px; padding: 0 10px; border: 1px solid var(--line); background: white; font-size: 10px; font-weight: 400; }
+    .note-editor-sync { margin-left: auto; border-color: var(--ink); background: var(--ink); color: white; }
+    .note-editor-delete { color: var(--accent); }
+    .note-editor-conflict { margin: 9px 0 0; padding: 9px; background: #f3eee5; color: var(--ink); font-size: 10px; }
+    .note-conflict-actions { margin-top: 7px; }
     .detail-match { margin: -14px 0 22px; }
     .detail section { margin: 0 0 21px; }
     .detail h3 {
@@ -421,6 +481,13 @@
     }
     .detail p { margin: 0; font-size: 14px; line-height: 1.85; white-space: pre-wrap; }
     .empty { color: var(--muted); padding: 42px 24px; line-height: 1.8; }
+    .missing-question-action {
+      min-height: 34px;
+      margin-top: 14px;
+      padding: 0 14px;
+      background: var(--ink);
+      font-size: 11px;
+    }
     footer {
       min-height: 30px;
       display: flex;
@@ -464,6 +531,13 @@
       .result-summary .result-copy { grid-column: 1 / -1; }
       .result-tags { padding-left: 16px; }
       .filter-strip { grid-template-columns: 1fr; }
+      .study-actions { flex-wrap: wrap; }
+      .study-action { flex: 1 1 calc(50% - 4px); padding-inline: 8px; }
+      .study-action-status { width: 100%; margin-left: 0; text-align: center; }
+      .question-note-editor { padding: 12px; }
+      .note-editor-foot { flex-wrap: wrap; }
+      .note-editor-hint { width: 100%; }
+      .note-editor-sync { margin-left: auto; }
     }
     @media (prefers-reduced-motion: no-preference) {
       .workspace { animation: arrive .28s ease-out both; }
@@ -472,6 +546,7 @@
   </style>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="editorial.css?v=29">
+  <link rel="stylesheet" href="auth.css?v=1">
 </head>
 <body>
   <header class="site-header">
@@ -571,6 +646,26 @@
     </footer>
   </main>
 
+  <dialog class="auth-dialog" id="authDialog" aria-labelledby="authTitle">
+    <button class="dialog-close" id="closeAuthDialog" type="button" aria-label="关闭登录窗口">×</button>
+    <div class="auth-card" id="authCard">
+      <div>
+        <p class="eyebrow">PRIVATE ARCHIVE</p>
+        <h2 id="authTitle">邮箱登录</h2>
+        <p id="authMessage">登录后，收藏和笔记会安全保存到你的私人档案。</p>
+      </div>
+      <form id="emailLoginForm">
+        <label for="loginEmail">1. 填写邮箱并获取验证码</label>
+        <div class="auth-row"><input id="loginEmail" name="email" type="email" autocomplete="email" required placeholder="you@example.com"><button type="submit">发送验证码</button></div>
+      </form>
+      <form id="otpForm">
+        <label for="loginOtp">2. 填写邮件中的验证码</label>
+        <div class="auth-row"><input id="loginOtp" name="otp" inputmode="numeric" autocomplete="one-time-code" required placeholder="请先发送验证码" disabled><button type="submit" disabled>登录</button></div>
+      </form>
+      <div class="session-row" id="sessionRow" hidden><span id="sessionEmail"></span><button id="signOut" type="button">退出登录</button></div>
+    </div>
+  </dialog>
+
   <script src="search_query.js"></script>
   <script src="tag_filters.js"></script>
   <script src="vendor/minisearch-7.2.0.js"></script>
@@ -581,6 +676,11 @@
   <script src="result_sort.js"></script>
   <script src="full_paper.js"></script>
   <script src="url_state.js"></script>
+  <script src="supabase-config.js?v=2"></script>
+  <script src="user_backend.js?v=2"></script>
+  <script src="auth_controller.js?v=1"></script>
+  <script src="question_actions.js?v=1"></script>
+  <script src="note_editor.js?v=1"></script>
   <script>
     const $ = (id) => document.getElementById(id);
     let questions = [];
@@ -593,10 +693,89 @@
     let availableYears = [];
     let selectedYears = [];
     let activeIndex = -1;
+    let activeQuestionId = "";
+    let activeQuestionMode = "";
+    let restoredQuestionId = "";
+    let restoredQuestionMode = "";
     let activeTagField = "years";
     let activeKeywordQuery = { positiveGroups: [], excludedTerms: [] };
     let activeFuzzyIds = new Set();
     let urlStateReady = false;
+    let questionBackend = null;
+    let questionAuthController = null;
+    let questionAuthUi = null;
+    let questionActions = null;
+    let questionNoteEditor = null;
+
+    async function openQuestionNote(action) {
+      if (activeQuestionId !== action.questionId) {
+        location.assign(action.returnUrl);
+        return;
+      }
+      activeQuestionMode = "note";
+      syncUrlState("push");
+      questionNoteEditor?.open(action.questionId);
+    }
+
+    async function resumeQuestionAction() {
+      const completed = await questionAuthController.runPendingAction({
+        favorite: (action) => questionBackend.addFavorite(action.questionId),
+        "open-note": openQuestionNote
+      });
+      if (completed?.type === "favorite" && activeQuestionId === completed.questionId) {
+        await questionActions?.activate(completed.questionId);
+      }
+      return completed;
+    }
+
+    async function resumePendingNote() {
+      return questionAuthController?.runPendingAction({
+        "save-note": (action) => questionNoteEditor.resumeAfterLogin(action)
+      });
+    }
+
+    async function initializeQuestionAuth() {
+      try {
+        questionBackend = UserBackend.createUserBackend(window.__SUPABASE_CONFIG__);
+        questionAuthController = AuthController.createAuthController({ backend: questionBackend });
+        questionAuthUi = AuthController.bindAuthDialog({
+          controller: questionAuthController,
+          async onSignedIn(user) {
+            if (window.__questionAuth) window.__questionAuth.user = user;
+            await questionBackend.recordActivity();
+            await resumeQuestionAction();
+          },
+          onSignedOut: () => location.reload()
+        });
+        questionNoteEditor = NoteEditor.createNoteEditor({
+          backend: questionBackend,
+          authController: questionAuthController,
+          authUi: questionAuthUi,
+          onClose() {
+            activeQuestionMode = "";
+            syncUrlState("replace");
+          }
+        });
+        questionActions = QuestionActions.createQuestionActions({
+          backend: questionBackend,
+          authController: questionAuthController,
+          authUi: questionAuthUi,
+          onOpenNote: openQuestionNote
+        });
+        const user = await questionAuthUi.initialize();
+        window.__questionAuth = {
+          backend: questionBackend,
+          controller: questionAuthController,
+          ui: questionAuthUi,
+          user
+        };
+      } catch (error) {
+        $("authMessage").textContent = error.message || "后端初始化失败";
+        $("authMessage").classList.add("error-message");
+      }
+    }
+
+    initializeQuestionAuth();
 
     const normalize = SearchEngine.normalize;
     const escapeHtml = (value) =>
@@ -648,6 +827,8 @@
     function captureUrlState() {
       return {
         keyword: $("keyword").value,
+        question: activeQuestionId,
+        mode: activeQuestionId ? activeQuestionMode : "",
         subject: $("subject").value,
         years: [...selectedYears],
         yearFrom: "",
@@ -671,6 +852,8 @@
     }
 
     function restoreUrlState(state) {
+      restoredQuestionId = state.question || "";
+      restoredQuestionMode = restoredQuestionId && state.mode === "note" ? "note" : "";
       $("keyword").value = state.keyword;
       $("subject").value = selectHasValue("subject", state.subject)
         ? state.subject
@@ -849,6 +1032,12 @@
 
     function applySearch(options) {
       const historyMode = options?.historyMode || "push";
+      const requestedQuestionId = options?.restoreQuestion ? restoredQuestionId : "";
+      const requestedQuestionMode = requestedQuestionId ? restoredQuestionMode : "";
+      restoredQuestionId = "";
+      restoredQuestionMode = "";
+      activeQuestionId = "";
+      activeQuestionMode = "";
       activeFuzzyIds = new Set();
       let conditions;
       try {
@@ -868,6 +1057,18 @@
         syncUrlState(historyMode);
         return;
       }
+      const requestedQuestion = requestedQuestionId
+        ? questions.find((question) => question.id === requestedQuestionId)
+        : null;
+      if (requestedQuestionId && !requestedQuestion) {
+        filtered = [];
+        activeIndex = -1;
+        renderMissingQuestion(requestedQuestionId);
+        renderTagPanel();
+        setMobilePane("detail");
+        syncUrlState(historyMode);
+        return;
+      }
       const hasSearchConditions = Boolean(
         conditions.keyword.trim()
         || conditions.years.length
@@ -877,6 +1078,18 @@
         || tagFields.some((field) => conditions.tags[field].length)
       );
       if (!hasSearchConditions) {
+        if (requestedQuestion) {
+          filtered = [requestedQuestion];
+          activeIndex = 0;
+          activeQuestionId = requestedQuestion.id;
+          activeQuestionMode = requestedQuestionMode;
+          renderResults();
+          renderActiveDetail();
+          renderTagPanel();
+          setMobilePane("detail");
+          syncUrlState(historyMode);
+          return;
+        }
         filtered = [];
         activeIndex = -1;
         renderIdleState();
@@ -932,13 +1145,22 @@
         : sortedMatches;
       activeIndex = -1;
       renderResults();
-      if (!filtered.length) {
+      const requestedIndex = $("sectionFilter").value === FullPaper.SECTION_VALUE
+        ? -1
+        : filtered.findIndex((question) => question.id === requestedQuestionId);
+      if (requestedIndex >= 0) {
+        setActiveResult(requestedIndex);
+        activeQuestionId = filtered[requestedIndex].id;
+        activeQuestionMode = requestedQuestionMode;
+        renderActiveDetail();
+        setMobilePane("detail");
+      } else if (!filtered.length) {
         renderEmpty();
       } else {
         renderSearchPending();
       }
       renderTagPanel();
-      setMobilePane("results");
+      if (requestedIndex < 0) setMobilePane("results");
       syncUrlState(historyMode);
     }
 
@@ -1146,8 +1368,41 @@
         ${tagSection("流派与思想传统", "schools", q.schools)}
         ${tagSection("历史时期", "periods", q.periods)}
         ${tagSection("问题与主题", "topics", q.topics)}
-        ${tagSection("涉及著作", "works", q.works)}`;
+        ${tagSection("涉及著作", "works", q.works)}
+        <div class="study-actions" data-question-actions data-question-id="${escapeHtml(q.id)}" aria-label="题目学习操作">
+          <button class="study-action" type="button" data-favorite-action aria-pressed="false">
+            <span class="study-action-icon" data-favorite-icon aria-hidden="true">☆</span><span data-favorite-label>收藏</span>
+          </button>
+          <button class="study-action study-action-primary" type="button" data-note-action aria-expanded="false" aria-controls="questionNoteEditor">笔记</button>
+          <span class="study-action-status" data-question-action-status role="status" aria-live="polite" hidden></span>
+        </div>
+        <section class="question-note-editor" id="questionNoteEditor" data-question-note data-question-id="${escapeHtml(q.id)}" aria-label="题目笔记" hidden>
+          <div class="note-editor-head">
+            <span class="note-editor-title">私人笔记</span>
+            <span class="note-editor-status" data-note-status role="status" aria-live="polite"></span>
+            <button class="note-editor-close" type="button" data-note-close>收起</button>
+          </div>
+          <textarea class="note-editor-content" data-note-content maxlength="50000" aria-describedby="questionNoteHint questionNoteCount" placeholder="写下你的理解、疑问或复习线索……"></textarea>
+          <div class="note-editor-conflict" data-note-conflict hidden>
+            本地草稿与云端版本不同。默认保留本地内容，不会自动覆盖。
+            <div class="note-conflict-actions">
+              <button class="note-editor-button" type="button" data-note-keep-local>保留本地草稿</button>
+              <button class="note-editor-button" type="button" data-note-use-cloud>恢复云端版本</button>
+            </div>
+          </div>
+          <div class="note-editor-foot">
+            <span class="note-editor-hint" id="questionNoteHint">草稿先保存在本机；登录后可跨设备同步。</span>
+            <span class="note-editor-count" id="questionNoteCount" data-note-count>0 / 50,000</span>
+            <button class="note-editor-button note-editor-delete" type="button" data-note-delete hidden>删除云端笔记</button>
+            <button class="note-editor-button note-editor-sync" type="button" data-note-sync>登录并同步</button>
+          </div>
+        </section>`;
       $("detail").scrollTop = 0;
+      questionNoteEditor?.activate(q.id, { open: activeQuestionMode === "note" });
+      questionActions?.activate(q.id).then((state) => {
+        questionNoteEditor?.applyCloudNote(q.id, state?.note);
+        resumePendingNote().catch(() => {});
+      });
     }
 
     function renderActiveDetail() {
@@ -1157,6 +1412,7 @@
         return;
       }
       if ($("sectionFilter").value === FullPaper.SECTION_VALUE) {
+        questionActions?.deactivate();
         renderFullPaperDetail(item);
       } else {
         renderDetail(item);
@@ -1201,16 +1457,34 @@
     }
 
     function renderEmpty() {
+      questionActions?.deactivate();
+      questionNoteEditor?.deactivate();
       $("detail").innerHTML =
         '<div class="empty"><strong>没有匹配结果</strong><br>换一个关键词，或按 Esc 清空全部条件。</div>';
     }
 
+    function renderMissingQuestion(questionId) {
+      questionActions?.deactivate();
+      questionNoteEditor?.deactivate();
+      const message = `找不到题目 ${escapeHtml(questionId)}。`;
+      $("resultCount").textContent = "题目不存在";
+      $("results").innerHTML = `<div class="empty">${message}</div>`;
+      $("detail").innerHTML = `
+        <div class="empty">
+          <strong>这道题可能已被移除或链接有误</strong><br>
+          <button class="missing-question-action" type="button" data-clear-question>返回检索</button>
+        </div>`;
+    }
+
     function renderSearchPending() {
+      questionActions?.deactivate();
+      questionNoteEditor?.deactivate();
       $("detail").innerHTML = '<div class="detail-pending">I D L E&nbsp;&nbsp;&nbsp;&nbsp;S T A T E</div>';
       $("detail").scrollTop = 0;
     }
 
     function renderIdleState() {
+      questionActions?.deactivate();
       const idleState = '<div class="detail-pending">I D L E&nbsp;&nbsp;&nbsp;&nbsp;S T A T E</div>';
       $("resultCount").textContent = "";
       $("results").innerHTML = idleState;
@@ -1300,10 +1574,23 @@
       if (!summary) return;
       const nextIndex = Number(summary.dataset.index);
       if (!setActiveResult(nextIndex)) return;
+      activeQuestionId = filtered[nextIndex]?.id || "";
+      activeQuestionMode = "";
       renderActiveDetail();
       setMobilePane("detail");
+      syncUrlState("push");
     });
     $("detail").addEventListener("click", (event) => {
+      const clearQuestion = event.target.closest("[data-clear-question]");
+      if (clearQuestion) {
+        activeQuestionId = "";
+        activeQuestionMode = "";
+        renderIdleState();
+        setMobilePane("results");
+        syncUrlState("push");
+        $("keyword").focus();
+        return;
+      }
       const page = event.target.closest("[data-paper-index]");
       if (page) {
         const nextIndex = Number(page.dataset.paperIndex);
@@ -1349,6 +1636,7 @@
     });
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") {
+        if (event.target.closest?.("[data-question-note]")) return;
         $("keyword").value = "";
         $("subject").value = "";
         $("sectionFilter").value = "";
@@ -1362,7 +1650,7 @@
     window.addEventListener("popstate", () => {
       if (!urlStateReady) return;
       restoreUrlState(UrlState.parse(window.location.search));
-      applySearch({ historyMode: "none" });
+      applySearch({ historyMode: "none", restoreQuestion: true });
     });
 
     Promise.all([
@@ -1397,7 +1685,7 @@
         populateFilters();
         restoreUrlState(UrlState.parse(window.location.search));
         urlStateReady = true;
-        applySearch({ historyMode: "replace" });
+        applySearch({ historyMode: "replace", restoreQuestion: true });
         $("keyword").focus();
       })
       .catch((error) => {

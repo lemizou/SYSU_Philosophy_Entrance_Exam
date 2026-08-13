@@ -110,6 +110,11 @@ main { width: min(1480px,calc(100% - 48px)); height: calc(100dvh - var(--header-
 .archive-list span { margin-right: 5px; padding: 2px 5px; border: 1px solid var(--line); color: var(--muted); font-size: 8px; }
 .archive-list a { color: var(--ink); font-size: 9px; text-decoration: none; }
 .filter-empty { padding: 40px 0; text-align: center; }
+.personal-empty { color: var(--muted); text-align: center; }
+.personal-empty p { margin: 0; font-size: 10px; line-height: 1.7; }
+.personal-empty strong { display: block; margin-bottom: 5px; color: var(--ink); font: 700 14px/1.4 SimSun,"STSong",serif; }
+.personal-empty a { display: inline-flex; align-items: center; min-height: 32px; margin-top: 13px; padding: 0 13px; border: 1px solid var(--ink); background: var(--ink); color: white; font-size: 9px; text-decoration: none; }
+.personal-empty a:hover { background: white; color: var(--ink); }
 .view-panel#notesView.active { display: flex; flex-direction: column; overflow: hidden; }
 .view-panel#notesView > .personal-search, .view-panel#notesView > .personal-filter-strip { flex: 0 0 auto; }
 .note-workspace { min-height: 0; flex: 1 1 auto; display: grid; grid-template-columns: 260px minmax(0,1fr); overflow: hidden; border: 1px solid var(--line); }
@@ -134,6 +139,7 @@ main { width: min(1480px,calc(100% - 48px)); height: calc(100dvh - var(--header-
 .note-editor textarea { width: 100%; min-height: 0; flex: 1 1 auto; resize: none; padding: 11px; border: 1px solid var(--line); color: var(--text); font-size: 11px; line-height: 1.65; }
 .editor-footer { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-top: 9px; }
 .editor-footer small { color: var(--muted); font-size: 8px; }
+.editor-footer a { margin-left: auto; color: var(--ink); font-size: 9px; text-decoration: underline; text-underline-offset: 3px; }
 .editor-footer button { min-height: 32px; padding: 0 12px; border: 0; border-radius: 5px; background: var(--ink); color: white; font-size: 9px; cursor: pointer; }
 .danger-text { color: var(--mark); }
 .history-timeline section { display: grid; grid-template-columns: 105px minmax(0,1fr); border-top: 1px solid var(--line); }

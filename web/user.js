@@ -3,22 +3,15 @@
 
   const byId = (id) => document.getElementById(id);
   const toast = byId("toast");
-  const authMessage = byId("authMessage");
-  const authDialog = byId("authDialog");
   let toastTimer;
   let backend = null;
+  let authController = null;
+  let authUi = null;
   let questions = new Map();
   let activeNote = null;
   let saveTimer = null;
-  let pendingEmail = "";
   let personalSearchAliases = window.ConceptAliases.create([]);
   let personalSearchReady = false;
-
-  byId("openAuthDialog").addEventListener("click", () => authDialog.showModal());
-  byId("closeAuthDialog").addEventListener("click", () => authDialog.close());
-  authDialog.addEventListener("click", (event) => {
-    if (event.target === authDialog) authDialog.close();
-  });
 
   function showToast(message, isError = false) {
     toast.textContent = message;
@@ -26,11 +19,6 @@
     toast.classList.add("visible");
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toast.classList.remove("visible"), 2600);
-  }
-
-  function setAuthMessage(message, isError = false) {
-    authMessage.textContent = message;
-    authMessage.classList.toggle("error-message", isError);
   }
 
   function showView(view) {
@@ -138,6 +126,9 @@
         list.insertBefore(item, empty);
         if (matches) visible += 1;
       });
+      if (items.length && visible === 0) {
+        empty.innerHTML = "<p>没有符合当前条件的结果。</p>";
+      }
       empty.hidden = visible !== 0;
     }
     search.addEventListener("input", apply);
@@ -163,6 +154,8 @@
     byId("noteContent").value = note.content;
     byId("noteContent").disabled = false;
     byId("saveNote").disabled = false;
+    byId("noteSourceLink").href = `search.html?question=${encodeURIComponent(note.question_id)}&mode=note`;
+    byId("noteSourceLink").hidden = false;
     byId("saveStatus").textContent = "所有更改已保存";
   }
 
@@ -170,7 +163,10 @@
     const list = byId("favoriteList");
     const empty = list.querySelector(".filter-empty");
     list.querySelectorAll("article").forEach((item) => item.remove());
-    empty.textContent = "没有符合当前条件的收藏。";
+    empty.innerHTML = rows.length ? "<p>没有符合当前条件的收藏。</p>" : `
+      <strong>收藏夹还是空的</strong>
+      <p>从任意题目详情页收藏第一道题，之后可在这里集中复习。</p>
+      <a href="search.html">去真题检索</a>`;
     rows.forEach((row, index) => {
       const question = questionFor(row.question_id);
       const item = document.createElement("article");
@@ -190,7 +186,7 @@
       title.textContent = question.question;
       details.append(meta, title);
       const link = document.createElement("a");
-      link.href = `search.html?q=${encodeURIComponent(question.question)}`;
+      link.href = `search.html?question=${encodeURIComponent(row.question_id)}`;
       link.textContent = "查看原题";
       item.append(mark, details, link);
       list.insertBefore(item, empty);
@@ -202,7 +198,10 @@
     const list = byId("noteResults");
     const empty = list.querySelector(".note-empty");
     list.querySelectorAll(".note-choice").forEach((item) => item.remove());
-    empty.textContent = "没有符合当前条件的笔记。";
+    empty.innerHTML = rows.length ? "<p>没有符合当前条件的笔记。</p>" : `
+      <strong>还没有私人笔记</strong>
+      <p>打开一道题，在题目末尾写下第一篇理解或复习线索。</p>
+      <a href="search.html">选择题目写笔记</a>`;
     activeNote = null;
     rows.forEach((note, index) => {
       const question = questionFor(note.question_id);
@@ -230,17 +229,9 @@
       byId("noteContent").value = "";
       byId("noteContent").disabled = true;
       byId("saveNote").disabled = true;
+      byId("noteSourceLink").hidden = true;
     }
     applyNoteFilters();
-  }
-
-  function setSignedIn(user) {
-    byId("emailLoginForm").hidden = true;
-    byId("otpForm").hidden = true;
-    byId("sessionRow").hidden = false;
-    byId("sessionEmail").textContent = user.email || "已登录";
-    byId("openAuthDialog").querySelector("span").textContent = "账户";
-    setAuthMessage("已连接私人后端，数据会跨设备保存。", false);
   }
 
   async function refreshData() {
@@ -283,46 +274,6 @@
   });
   byId("saveNote").addEventListener("click", () => saveActiveNote().catch(() => {}));
 
-  byId("emailLoginForm").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const button = event.currentTarget.querySelector("button");
-    button.disabled = true;
-    try {
-      pendingEmail = await backend.requestOtp(byId("loginEmail").value, location.href.split("#")[0]);
-      byId("loginOtp").disabled = false;
-      byId("loginOtp").placeholder = "6 位验证码";
-      byId("otpForm").querySelector("button").disabled = false;
-      setAuthMessage(`验证码已发送至 ${pendingEmail}。也可以直接点击邮件中的登录链接。`);
-      byId("loginOtp").focus();
-    } catch (error) {
-      setAuthMessage(error.message || "验证码发送失败", true);
-    } finally {
-      button.disabled = false;
-    }
-  });
-
-  byId("otpForm").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const button = event.currentTarget.querySelector("button");
-    button.disabled = true;
-    try {
-      const session = await backend.verifyOtp(pendingEmail || byId("loginEmail").value, byId("loginOtp").value);
-      setSignedIn(session.user);
-      await backend.recordActivity();
-      await refreshData();
-      authDialog.close();
-    } catch (error) {
-      setAuthMessage(error.message || "登录失败", true);
-    } finally {
-      button.disabled = false;
-    }
-  });
-
-  byId("signOut").addEventListener("click", async () => {
-    await backend.signOut();
-    location.reload();
-  });
-
   window.addEventListener("pagehide", () => {
     if (activeNote && byId("saveStatus").textContent !== "所有更改已保存") {
       saveActiveNote().catch(() => {});
@@ -346,19 +297,19 @@
       applyFavoriteFilters();
       applyNoteFilters();
       backend = window.UserBackend.createUserBackend(window.__SUPABASE_CONFIG__);
-      if (location.hash.includes("access_token=")) {
-        backend.acceptRedirect(location.hash);
-        history.replaceState(null, "", `${location.pathname}${location.search}`);
-      }
-      let session = backend.getSession();
-      if (session?.access_token) {
-        const user = session.user?.id ? session.user : await backend.hydrateUser();
-        setSignedIn(user);
-        await backend.recordActivity();
-        await refreshData();
-      }
+      authController = window.AuthController.createAuthController({ backend });
+      authUi = window.AuthController.bindAuthDialog({
+        controller: authController,
+        async onSignedIn() {
+          await backend.recordActivity();
+          await refreshData();
+        },
+        onSignedOut() { location.reload(); }
+      });
+      await authUi.initialize();
     } catch (error) {
-      setAuthMessage(error.message || "后端初始化失败", true);
+      byId("authMessage").textContent = error.message || "后端初始化失败";
+      byId("authMessage").classList.add("error-message");
       document.querySelectorAll("#emailLoginForm input, #emailLoginForm button")
         .forEach((element) => { element.disabled = true; });
     }
@@ -367,7 +318,9 @@
   window.__userSearchTestApi = {
     get ready() { return personalSearchReady; },
     applyFavoriteFilters,
-    applyNoteFilters
+    applyNoteFilters,
+    renderFavorites,
+    renderNotes
   };
   initialize();
 })();

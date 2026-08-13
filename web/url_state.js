@@ -21,6 +21,8 @@
     }
     return {
       keyword: params.get("q") || "",
+      question: params.get("question") || "",
+      mode: params.get("mode") === "note" ? "note" : "",
       subject: params.get("subject") || "",
       years: [...new Set(params.getAll("year").filter(Boolean))],
       yearFrom: params.get("from") || "",
@@ -34,6 +36,8 @@
   function serialize(state) {
     const params = new URLSearchParams();
     if (state.keyword) params.set("q", state.keyword);
+    if (state.question) params.set("question", state.question);
+    if (state.question && state.mode === "note") params.set("mode", "note");
     if (state.subject) params.set("subject", state.subject);
     for (const year of state.years || []) params.append("year", year);
     if (state.yearFrom) params.set("from", state.yearFrom);

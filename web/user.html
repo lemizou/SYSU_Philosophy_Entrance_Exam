@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>中大哲学 · 个人档案</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="user.css?v=19">
+  <link rel="stylesheet" href="user.css?v=20">
 </head>
 <body>
   <header class="site-header">
@@ -84,7 +84,7 @@
           <button class="reset-personal-filters" type="button">重置条件</button>
         </div>
         <div class="archive-list" id="favoriteList">
-          <p class="filter-empty">登录后显示你的收藏。</p>
+          <div class="personal-empty filter-empty"><p>登录后显示你的收藏。</p></div>
         </div>
       </section>
 
@@ -101,7 +101,7 @@
         <div class="note-workspace">
           <div class="note-index">
             <div class="note-results" id="noteResults">
-              <p class="note-empty">登录后显示你的笔记。</p>
+              <div class="personal-empty note-empty"><p>登录后显示你的笔记。</p></div>
             </div>
           </div>
           <div class="note-editor">
@@ -109,7 +109,7 @@
             <h4 id="noteTitle">私人笔记</h4>
             <label for="noteContent">私人笔记</label>
             <textarea id="noteContent" disabled placeholder="登录并选择一篇笔记后编辑"></textarea>
-            <div class="editor-footer"><small>支持基础 Markdown · 自动保存到私人后端</small><button type="button" id="saveNote" disabled>保存笔记</button></div>
+            <div class="editor-footer"><small>支持基础 Markdown · 自动保存到私人后端</small><a id="noteSourceLink" href="search.html" hidden>查看原题</a><button type="button" id="saveNote" disabled>保存笔记</button></div>
           </div>
         </div>
       </section>
@@ -142,7 +142,8 @@
   <script src="concept_aliases.js"></script>
   <script src="search_index.js"></script>
   <script src="supabase-config.js?v=2"></script>
-  <script src="user_backend.js?v=1"></script>
-  <script src="user.js?v=10"></script>
+  <script src="user_backend.js?v=2"></script>
+  <script src="auth_controller.js?v=1"></script>
+  <script src="user.js?v=11"></script>
 </body>
 </html>

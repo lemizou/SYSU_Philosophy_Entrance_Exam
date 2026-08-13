@@ -28,6 +28,18 @@
     return { url, publishableKey };
   }
 
+  function normalizeQuestionId(questionId) {
+    const value = String(questionId || "").trim();
+    if (
+      value.length < 1
+      || value.length > 160
+      || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)
+    ) {
+      throw new BackendError("题目 ID 格式不正确");
+    }
+    return value;
+  }
+
   const FOCUS_TAG_FIELDS = ["philosophers", "topics", "schools"];
 
   function calculateWeeklyFocus({ favorites = [], notes = [], questions = [] } = {}, options = {}) {
@@ -198,16 +210,52 @@
         ]);
         return { favorites, notes, stats: stats?.[0] || null, activity };
       },
+      async loadQuestionState(questionId) {
+        await requireSession();
+        const normalizedId = normalizeQuestionId(questionId);
+        const encodedId = encodeURIComponent(normalizedId);
+        const [favorites, notes] = await Promise.all([
+          call(`/rest/v1/favorites?select=question_id,created_at&question_id=eq.${encodedId}&limit=1`),
+          call(`/rest/v1/notes?select=question_id,content,created_at,updated_at&question_id=eq.${encodedId}&limit=1`)
+        ]);
+        return {
+          questionId: normalizedId,
+          favorite: Boolean(favorites?.[0]),
+          note: notes?.[0] || null
+        };
+      },
+      async addFavorite(questionId) {
+        const active = await requireSession();
+        const normalizedId = normalizeQuestionId(questionId);
+        const rows = await call("/rest/v1/favorites?on_conflict=user_id,question_id", {
+          method: "POST",
+          headers: { Prefer: "resolution=ignore-duplicates,return=representation" },
+          body: JSON.stringify([{
+            user_id: active.user.id,
+            question_id: normalizedId
+          }])
+        });
+        return rows?.[0] || { question_id: normalizedId };
+      },
+      async removeFavorite(questionId) {
+        const active = await requireSession();
+        const normalizedId = normalizeQuestionId(questionId);
+        await call(`/rest/v1/favorites?user_id=eq.${active.user.id}&question_id=eq.${encodeURIComponent(normalizedId)}`, {
+          method: "DELETE"
+        });
+        return true;
+      },
       async recordActivity() {
         await requireSession();
         return call("/rest/v1/rpc/record_activity", { method: "POST", body: "{}" });
       },
       async saveNote(questionId, content) {
         const active = await requireSession();
+        const normalizedId = normalizeQuestionId(questionId);
         const value = String(content || "");
         if (value.length > 50000) throw new BackendError("单篇笔记不能超过 50,000 字");
         if (!value.trim()) {
-          await call(`/rest/v1/notes?user_id=eq.${active.user.id}&question_id=eq.${encodeURIComponent(questionId)}`, {
+          await call(`/rest/v1/notes?user_id=eq.${active.user.id}&question_id=eq.${encodeURIComponent(normalizedId)}`, {
             method: "DELETE"
           });
           return null;
@@ -215,12 +263,27 @@
         const rows = await call("/rest/v1/notes?on_conflict=user_id,question_id", {
           method: "POST",
           headers: { Prefer: "resolution=merge-duplicates,return=representation" },
-          body: JSON.stringify([{ user_id: active.user.id, question_id: questionId, content: value }])
+          body: JSON.stringify([{ user_id: active.user.id, question_id: normalizedId, content: value }])
         });
         return rows?.[0] || null;
+      },
+      async deleteNote(questionId) {
+        const active = await requireSession();
+        const normalizedId = normalizeQuestionId(questionId);
+        await call(`/rest/v1/notes?user_id=eq.${active.user.id}&question_id=eq.${encodeURIComponent(normalizedId)}`, {
+          method: "DELETE"
+        });
+        return true;
       }
     };
   }
 
-  return { BackendError, SESSION_KEY, calculateWeeklyFocus, createUserBackend, normalizeConfig };
+  return {
+    BackendError,
+    SESSION_KEY,
+    calculateWeeklyFocus,
+    createUserBackend,
+    normalizeConfig,
+    normalizeQuestionId
+  };
 });
