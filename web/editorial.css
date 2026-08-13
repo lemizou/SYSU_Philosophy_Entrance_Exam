@@ -570,6 +570,22 @@ button:focus-visible {
   font-weight: 400;
 }
 
+.panel-head .panel-head-label,
+.panel-head .detail-context {
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+.panel-head .detail-context {
+  min-width: 0;
+  margin-left: auto;
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .results,
 .detail {
   position: relative;
@@ -590,7 +606,7 @@ button:focus-visible {
 
 .result-summary {
   grid-template-columns: 42px 82px 60px minmax(0, 1fr);
-  gap: 8px;
+  gap: 12px;
   padding: 10px 12px 6px;
   border-radius: 0;
   background: transparent;
@@ -607,16 +623,16 @@ button:focus-visible {
 
 .result-tags {
   gap: 4px;
-  padding: 0 12px 9px 216px;
+  padding: 0 12px 9px 228px;
 }
 
 .meta {
   color: var(--muted);
-  font-size: 9px;
+  font-size: 11.25px;
 }
 
 .question {
-  font-size: 12px;
+  font-size: 15px;
   line-height: 1.55;
 }
 
@@ -627,7 +643,7 @@ button:focus-visible {
 
 .match-fields-label,
 .match-field {
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .match-field {
@@ -640,7 +656,7 @@ button:focus-visible {
 
 .result-snippet {
   margin-top: 5px;
-  font-size: 9px;
+  font-size: 11.25px;
 }
 
 mark.match {
@@ -657,7 +673,7 @@ mark.match {
 }
 
 .filter-tag {
-  min-height: 17px;
+  min-height: 21.25px;
   gap: 5px;
   padding: 1px 6px;
   border: 1px solid var(--line);
@@ -689,6 +705,13 @@ mark.match {
   gap: 5px;
 }
 
+.results-panel .panel-head,
+.results-panel .panel-head *,
+.results,
+.results * {
+  font-weight: 400;
+}
+
 .detail {
   padding: 18px 21px;
 }
@@ -718,14 +741,20 @@ mark.match {
   margin-bottom: 6px;
   color: var(--muted);
   font-family: "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
-  font-size: 9px;
+  font-size: 11.4px;
   font-weight: 400;
   letter-spacing: .1em;
 }
 
 .detail p {
-  font-size: 12px;
-  line-height: 1.75;
+  font-size: 15.2px;
+  line-height: 1.8;
+}
+
+.detail .record-tags .filter-tag {
+  min-height: 23px;
+  padding: 2px 8px;
+  font-size: 11.4px;
 }
 
 .empty {
@@ -747,7 +776,7 @@ footer {
   min-height: 22px;
   align-items: center;
   padding: 5px 1px 1px;
-  font-size: 9px;
+  font-size: 11.25px;
 }
 
 footer a {
@@ -786,7 +815,7 @@ footer a:hover {
   }
 
   .result-tags {
-    padding-left: 126px;
+    padding-left: 134px;
   }
 }
 
@@ -808,7 +837,7 @@ footer a:hover {
   }
 
   h1 {
-    font-size: 14px;
+    font-size: 16px;
   }
 
 
@@ -1130,7 +1159,7 @@ footer a:hover {
 
   .result-summary {
     grid-template-columns: 34px 66px minmax(0, 1fr);
-    gap: 5px;
+    gap: 12px;
     padding: 7px 7px 4px;
   }
 
@@ -1139,26 +1168,31 @@ footer a:hover {
   }
 
   .meta {
-    font-size: 7px;
+    font-size: 10.89px;
   }
 
   .question {
-    font-size: 9px;
+    font-size: 14px;
     line-height: 1.5;
   }
 
   .result-snippet {
-    font-size: 8px;
+    font-size: 12.44px;
+  }
+
+  .match-fields-label,
+  .match-field {
+    font-size: 12.44px;
   }
 
   .result-tags {
-    padding: 0 7px 6px 112px;
+    padding: 0 7px 6px 126px;
   }
 
   .filter-tag {
-    min-height: 15px;
+    min-height: 23.33px;
     padding: 0 5px;
-    font-size: 7px;
+    font-size: 10.89px;
   }
 
   .detail {
@@ -1179,12 +1213,18 @@ footer a:hover {
   }
 
   .detail h3 {
-    font-size: 8px;
+    font-size: 12.92px;
   }
 
   .detail p {
-    font-size: 10px;
-    line-height: 1.65;
+    font-size: 16.15px;
+    line-height: 1.8;
+  }
+
+  .detail .record-tags .filter-tag {
+    min-height: 25.5px;
+    padding: 2px 8.5px;
+    font-size: 11.305px;
   }
 
   footer {
@@ -1341,8 +1381,13 @@ footer a:hover {
 
 .detail .paper-passage.paper-passage-plain p {
   color: var(--ink-dark);
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.8;
+}
+
+.detail .detail-material p,
+.detail .paper-passage p {
+  font-size: 15px;
 }
 
 @media (max-width: 560px) {
@@ -1367,6 +1412,14 @@ footer a:hover {
 
   .paper-passage {
     grid-column: 1;
+  }
+}
+
+@media (max-width: 720px) {
+  .detail .detail-material p,
+  .detail .paper-passage p,
+  .detail .paper-passage.paper-passage-plain p {
+    font-size: 14px;
   }
 }
 

@@ -545,7 +545,7 @@
     }
   </style>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="editorial.css?v=29">
+  <link rel="stylesheet" href="editorial.css?v=37">
   <link rel="stylesheet" href="auth.css?v=1">
 </head>
 <body>
@@ -630,7 +630,10 @@
           aria-orientation="vertical" aria-valuemin="32" aria-valuemax="68"
           aria-valuenow="52" tabindex="0"></div>
         <aside class="detail-panel">
-          <div class="panel-head">试题详情</div>
+          <div class="panel-head">
+            <span class="panel-head-label">试题详情</span>
+            <span class="detail-context" id="detailContext"></span>
+          </div>
           <div class="detail" id="detail">
             <div class="detail-pending">I D L E&nbsp;&nbsp;&nbsp;&nbsp;S T A T E</div>
           </div>
@@ -1300,7 +1303,7 @@
       return true;
     }
 
-    function section(label, value, highlight = false) {
+    function section(label, value, highlight = false, className = "") {
       if (!value) return "";
       const content = highlight
         ? SearchHighlight.highlight(
@@ -1310,7 +1313,7 @@
           escapeHtml
         )
         : escapeHtml(value);
-      return `<section><h3>${label}</h3><p>${content}</p></section>`;
+      return `<section${className ? ` class="${className}"` : ""}><h3>${label}</h3><p>${content}</p></section>`;
     }
 
     function renderFilterTag(field, name) {
@@ -1358,12 +1361,12 @@
     }
 
     function renderDetail(q) {
+      $("detailContext").textContent = `${q.year} · ${q.subject || "未知科目"}`;
       $("detail").innerHTML = `
-        <h2>${escapeHtml(q.year)} · ${escapeHtml(q.subject || "未知科目")}</h2>
         <p class="subline">${escapeHtml(q.section || "未知题型")} · 第 ${escapeHtml(q.number ?? "—")} 题</p>
         ${renderMatchFields(q, "detail-match")}
         ${section("题目", q.question, true)}
-        ${section("材料", q.passage, true)}
+        ${section("材料", q.passage, true, "detail-material")}
         ${tagSection("涉及人物", "philosophers", q.philosophers)}
         ${tagSection("流派与思想传统", "schools", q.schools)}
         ${tagSection("历史时期", "periods", q.periods)}
@@ -1451,12 +1454,14 @@
     }
 
     function renderFullPaperDetail(paper) {
+      $("detailContext").textContent = `${paper.year} · ${paper.subject || "未知科目"}`;
       $("detail").innerHTML =
         paper.questions.map(renderFullPaperQuestion).join("");
       $("detail").scrollTop = 0;
     }
 
     function renderEmpty() {
+      $("detailContext").textContent = "";
       questionActions?.deactivate();
       questionNoteEditor?.deactivate();
       $("detail").innerHTML =
@@ -1477,6 +1482,7 @@
     }
 
     function renderSearchPending() {
+      $("detailContext").textContent = "";
       questionActions?.deactivate();
       questionNoteEditor?.deactivate();
       $("detail").innerHTML = '<div class="detail-pending">I D L E&nbsp;&nbsp;&nbsp;&nbsp;S T A T E</div>';
@@ -1487,6 +1493,7 @@
       questionActions?.deactivate();
       const idleState = '<div class="detail-pending">I D L E&nbsp;&nbsp;&nbsp;&nbsp;S T A T E</div>';
       $("resultCount").textContent = "";
+      $("detailContext").textContent = "";
       $("results").innerHTML = idleState;
       $("detail").innerHTML = idleState;
       $("results").scrollTop = 0;
