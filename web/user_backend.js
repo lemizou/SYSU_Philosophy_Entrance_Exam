@@ -202,13 +202,14 @@
       },
       async loadMyData() {
         await requireSession();
-        const [favorites, notes, stats, activity] = await Promise.all([
+        const [favorites, notes, recentViews, stats, activity] = await Promise.all([
           call("/rest/v1/favorites?select=question_id,created_at&order=created_at.desc"),
           call("/rest/v1/notes?select=question_id,content,created_at,updated_at&order=updated_at.desc"),
+          call("/rest/v1/recent_views?select=question_id,last_viewed_at,view_count&order=last_viewed_at.desc&limit=1"),
           call("/rest/v1/rpc/get_my_stats", { method: "POST", body: "{}" }),
           call("/rest/v1/daily_user_activity?select=activity_date,last_seen_at&order=activity_date.desc&limit=28")
         ]);
-        return { favorites, notes, stats: stats?.[0] || null, activity };
+        return { favorites, notes, recentViews, stats: stats?.[0] || null, activity };
       },
       async loadQuestionState(questionId) {
         await requireSession();
@@ -248,6 +249,14 @@
       async recordActivity() {
         await requireSession();
         return call("/rest/v1/rpc/record_activity", { method: "POST", body: "{}" });
+      },
+      async recordRecentView(questionId) {
+        await requireSession();
+        const normalizedId = normalizeQuestionId(questionId);
+        return call("/rest/v1/rpc/record_recent_view", {
+          method: "POST",
+          body: JSON.stringify({ p_question_id: normalizedId })
+        });
       },
       async saveNote(questionId, content) {
         const active = await requireSession();

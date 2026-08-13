@@ -43,17 +43,17 @@
 
       <section class="view-panel active" id="overviewView" data-panel="overview">
         <div class="view-heading">
-          <div><p class="eyebrow">11 AUG 2026</p><h3>今天从这里继续</h3></div>
+          <div><p class="eyebrow" id="resumeEyebrow">最近学习</p><h3>今天从这里继续</h3></div>
         </div>
 
-        <article class="resume-record">
-          <div class="record-date"><strong>11</strong><span>八月</span></div>
+        <article class="resume-record" id="resumeRecord">
+          <div class="record-date"><strong id="resumeDay">—</strong><span id="resumeMonth">—</span></div>
           <div class="record-main">
-            <div class="record-meta"><span>西方哲学史</span><span>2021</span><span>论述题</span></div>
-            <h4>康德的先验统觉</h4>
-            <p>笔记摘要：先验统觉不是经验中的自我观察，而是表象能够统一为“我的表象”的先验条件……</p>
+            <div class="record-meta" id="resumeMeta"><span>私人档案</span></div>
+            <h4 id="resumeTitle">登录后继续最近学习</h4>
+            <p id="resumeSummary">这里会显示你最近查看的真题及对应笔记。</p>
           </div>
-          <a class="record-action" href="search.html?q=%E5%85%88%E9%AA%8C%E7%BB%9F%E8%A7%89">继续阅读</a>
+          <a class="record-action" id="resumeAction" href="search.html">浏览真题</a>
         </article>
 
         <div class="overview-grid">
@@ -143,8 +143,8 @@
   <script src="concept_aliases.js"></script>
   <script src="search_index.js"></script>
   <script src="supabase-config.js?v=2"></script>
-  <script src="user_backend.js?v=2"></script>
+  <script src="user_backend.js?v=3"></script>
   <script src="auth_controller.js?v=2"></script>
-  <script src="user.js?v=18"></script>
+  <script src="user.js?v=19"></script>
 </body>
 </html>

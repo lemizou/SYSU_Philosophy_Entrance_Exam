@@ -102,6 +102,41 @@
       .format(new Date(value));
   }
 
+  function renderResume(recentViews = [], notes = []) {
+    const recent = recentViews[0];
+    if (!recent) {
+      byId("resumeEyebrow").textContent = "最近学习";
+      byId("resumeDay").textContent = "—";
+      byId("resumeMonth").textContent = "—";
+      byId("resumeMeta").replaceChildren(Object.assign(document.createElement("span"), { textContent: "尚无记录" }));
+      byId("resumeTitle").textContent = "从一道真题开始";
+      byId("resumeSummary").textContent = "打开任意真题后，最近学习记录会自动出现在这里。";
+      byId("resumeAction").href = "search.html";
+      byId("resumeAction").textContent = "浏览真题";
+      return;
+    }
+    const question = questionFor(recent.question_id);
+    const viewedAt = new Date(recent.last_viewed_at);
+    const validDate = Number.isFinite(viewedAt.getTime());
+    byId("resumeEyebrow").textContent = validDate
+      ? new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" }).format(viewedAt).toUpperCase()
+      : "最近学习";
+    byId("resumeDay").textContent = validDate ? String(viewedAt.getDate()).padStart(2, "0") : "—";
+    byId("resumeMonth").textContent = validDate
+      ? new Intl.DateTimeFormat("zh-CN", { month: "long" }).format(viewedAt)
+      : "—";
+    byId("resumeMeta").replaceChildren(...[question.subject, question.year, question.section].map((value) =>
+      Object.assign(document.createElement("span"), { textContent: value })));
+    byId("resumeTitle").textContent = `${question.question}${question.passage || ""}`;
+    const note = notes.find((item) => item.question_id === recent.question_id);
+    const noteText = note?.content?.trim() || "";
+    byId("resumeSummary").textContent = noteText
+      ? `笔记摘要：${noteText.replace(/\s+/g, " ").slice(0, 90)}${noteText.length > 90 ? "……" : ""}`
+      : `已查看 ${recent.view_count || 1} 次，继续复习这道题。`;
+    byId("resumeAction").href = `search.html?question=${encodeURIComponent(recent.question_id)}${note ? "&mode=note" : ""}`;
+    byId("resumeAction").textContent = "继续阅读";
+  }
+
   function setupFilters(scope, listSelector, itemSelector, emptySelector) {
     const strip = document.querySelector(`[data-filter-scope="${scope}"]`);
     const search = document.querySelector(`[data-personal-search="${scope}"]`);
@@ -260,6 +295,7 @@
     Object.entries(values).forEach(([id, value]) => { byId(id).textContent = value; });
     renderFavorites(data.favorites);
     renderNotes(data.notes);
+    renderResume(data.recentViews, data.notes);
     renderCalendar(data.activity);
     renderWeeklyFocus(data.favorites, data.notes);
   }
@@ -342,7 +378,8 @@
     applyFavoriteFilters,
     applyNoteFilters,
     renderFavorites,
-    renderNotes
+    renderNotes,
+    renderResume
   };
   initialize();
 })();

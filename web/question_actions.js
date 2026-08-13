@@ -81,7 +81,10 @@
       render();
       if (!signedIn) return state;
       try {
-        const loaded = await backend.loadQuestionState(questionId);
+        const [loaded] = await Promise.all([
+          backend.loadQuestionState(questionId),
+          Promise.resolve(backend.recordRecentView?.(questionId)).catch(() => null)
+        ]);
         if (version !== requestVersion || state?.questionId !== questionId) return null;
         state.favorite = loaded.favorite;
         state.note = loaded.note;
