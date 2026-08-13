@@ -9,6 +9,15 @@
   const FILTER_STORAGE_KEY = "sysu-statistics-filters-v1";
   const $ = (id) => document.getElementById(id);
   let questions = [];
+  let heatmapJob = 0;
+  let heatmapGeneration = 0;
+
+  function cancelHeatmapJob() {
+    if (!heatmapJob) return;
+    if ("cancelIdleCallback" in window) cancelIdleCallback(heatmapJob);
+    else clearTimeout(heatmapJob);
+    heatmapJob = 0;
+  }
 
   function searchUrl({ year, tag }) {
     const params = new URLSearchParams();
@@ -81,11 +90,35 @@
   }
 
   function renderPending() {
+    heatmapGeneration += 1;
+    cancelHeatmapJob();
     $("statisticsPending").hidden = false;
+    $("statisticsPending").textContent = "I D L E\u00a0\u00a0\u00a0\u00a0S T A T E";
     document.querySelectorAll(".dashboard .panel").forEach((panel) => { panel.hidden = true; });
     $("yearCount").textContent = "—"; $("questionCount").textContent = "—"; $("tagCountLabel").textContent = "考点数量"; $("tagCount").textContent = "—"; $("topTag").textContent = "—";
     $("yearChartTitle").textContent = "考点相关试题分布"; $("rankingTitle").textContent = "高频考点";
     $("yearChart").querySelector("svg").innerHTML = ""; $("ranking").innerHTML = ""; $("heatGrid").innerHTML = ""; $("heatLabelList").innerHTML = "";
+  }
+
+  function renderHeatmap(summary) {
+    const heatRows = summary.ranking; const grid = $("heatGrid");
+    grid.style.gridTemplateColumns = `84px repeat(${summary.years.length},minmax(36px,1fr)) 52px`;
+    grid.innerHTML = `<span class="heat-corner"></span>${summary.years.map((year) => `<span class="heat-head">${String(year).slice(2)}</span>`).join("")}<span class="heat-head">合计</span>` + heatRows.map((item) => `<span class="heat-label">${item.name}</span>${summary.years.map((year) => { const value = item.years.get(year) || 0; const level = value ? Math.max(1, Math.ceil(value / Math.max(1, summary.maxCellCount) * 4)) : 0; return `<a class="heat-cell" data-level="${level}" href="${searchUrl({year,tag:item.name})}" aria-label="${item.name}，${year}年，${value}题">${value}</a>`; }).join("")}<span class="heat-total">${item.count} 题</span>`).join("");
+    $("heatLabelList").innerHTML = heatRows.map((item) => `<span class="heat-label">${item.name}</span>`).join("");
+  }
+
+  function scheduleHeatmap(summary) {
+    const generation = ++heatmapGeneration;
+    cancelHeatmapJob();
+    $("heatGrid").innerHTML = '<span class="empty">正在生成热力表…</span>';
+    $("heatLabelList").innerHTML = "";
+    const draw = () => {
+      heatmapJob = 0;
+      if (generation === heatmapGeneration) renderHeatmap(summary);
+    };
+    heatmapJob = "requestIdleCallback" in window
+      ? requestIdleCallback(draw, { timeout: 250 })
+      : setTimeout(draw, 0);
   }
 
   function render() {
@@ -102,10 +135,8 @@
     const top = summary.ranking.slice(0, isMobile ? 5 : 7); const maxRank = top[0]?.count || 1;
     $("ranking").innerHTML = top.length ? top.map((item) => { const percent = Math.round(item.count / maxRank * 100); return `<button class="rank-row" type="button" data-tag="${item.name}" aria-label="${item.name}，${item.count}题，相对最高频${percent}%"><span>${item.name}</span><span class="rank-track"><i class="rank-fill" style="width:${percent}%"></i></span><strong>${item.count} 题</strong></button>`; }).join("") : '<span class="empty">当前范围没有可统计的考点。</span>';
     $("ranking").querySelectorAll("[data-tag]").forEach((button) => button.addEventListener("click", () => location.href = searchUrl({ tag: button.dataset.tag })));
-    const heatRows = summary.ranking; const grid = $("heatGrid"); grid.style.gridTemplateColumns = `84px repeat(${summary.years.length},minmax(36px,1fr)) 52px`;
-    grid.innerHTML = `<span class="heat-corner"></span>${summary.years.map((year) => `<span class="heat-head">${String(year).slice(2)}</span>`).join("")}<span class="heat-head">合计</span>` + heatRows.map((item) => `<span class="heat-label">${item.name}</span>${summary.years.map((year) => { const value = item.years.get(year) || 0; const level = value ? Math.max(1, Math.ceil(value / Math.max(1, summary.maxCellCount) * 4)) : 0; return `<a class="heat-cell" data-level="${level}" href="${searchUrl({year,tag:item.name})}" aria-label="${item.name}，${year}年，${value}题">${value}</a>`; }).join("")}<span class="heat-total">${item.count} 题</span>`).join("");
-    const heatScroll = grid.parentElement; const labelList = $("heatLabelList");
-    labelList.innerHTML = heatRows.map((item) => `<span class="heat-label">${item.name}</span>`).join("");
+    scheduleHeatmap(summary);
+    const heatScroll = $("heatGrid").parentElement; const labelList = $("heatLabelList");
     let lastScrollTop = -1;
     heatScroll.onscroll = () => {
       if (heatScroll.scrollTop === lastScrollTop) return;
@@ -126,5 +157,10 @@
     $("filters").addEventListener("reset", () => setTimeout(() => { $("yearFrom").value = years[0]; $("yearTo").value = years.at(-1); saveFilters(); render(); }));
     new ResizeObserver(() => { const type = $("tagType").value; if (!type) return; const summary = ExamStatistics.summarize(questions, type, currentFilters()); drawYearChart(summary, TYPE_LABELS[type]); }).observe($("yearChart"));
     render();
-  }).catch(() => { $("ranking").innerHTML = '<span class="empty">无法读取题库数据，请通过本地服务器或公开网站访问。</span>'; });
+  }).catch(() => {
+    const pending = $("statisticsPending");
+    pending.hidden = false;
+    pending.textContent = "无法读取题库，请通过本地服务器或公开网站访问。";
+    document.querySelectorAll(".dashboard .panel").forEach((panel) => { panel.hidden = true; });
+  });
 })();

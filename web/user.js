@@ -293,29 +293,38 @@
     }
   });
 
-  async function initialize() {
-    renderCalendar();
-    try {
-      const [questionsResponse, conceptsResponse] = await Promise.all([
-        fetch("../data/questions.json"),
-        fetch("../data/concept_aliases.json")
-      ]);
+  async function loadReferenceData() {
+    const [questionsResponse, conceptsResponse] = await Promise.all([
+      fetch("../data/questions.json"),
+      fetch("../data/concept_aliases.json")
+    ]);
       if (!questionsResponse.ok) throw new Error("题库加载失败");
       if (!conceptsResponse.ok) throw new Error("概念别名表加载失败");
-      questions = new Map((await questionsResponse.json()).map((item) => [item.id, item]));
-      personalSearchAliases = window.ConceptAliases.create(
-        (await conceptsResponse.json()).groups || []
-      );
-      personalSearchReady = true;
-      applyFavoriteFilters();
-      applyNoteFilters();
+    questions = new Map((await questionsResponse.json()).map((item) => [item.id, item]));
+    personalSearchAliases = window.ConceptAliases.create(
+      (await conceptsResponse.json()).groups || []
+    );
+    personalSearchReady = true;
+    applyFavoriteFilters();
+    applyNoteFilters();
+  }
+
+  async function initialize() {
+    renderCalendar();
+    const referenceDataReady = loadReferenceData().catch((error) => {
+      showToast(error.message || "题库加载失败", true);
+    });
+    try {
       backend = window.UserBackend.createUserBackend(window.__SUPABASE_CONFIG__);
       authController = window.AuthController.createAuthController({ backend });
       authUi = window.AuthController.bindAuthDialog({
         controller: authController,
         async onSignedIn() {
-          await backend.recordActivity();
-          await refreshData();
+          await referenceDataReady;
+          await Promise.all([
+            backend.recordActivity().catch(() => null),
+            refreshData()
+          ]);
         },
         onSignedOut() { location.reload(); }
       });

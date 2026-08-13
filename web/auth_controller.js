@@ -145,6 +145,10 @@
       setMessage("已连接私人后端，数据会跨设备保存。", false);
     }
 
+    function setSignedOut() {
+      if (openButton) openButton.querySelector("span")?.replaceChildren("登录");
+    }
+
     function open() {
       if (!dialog.open) {
         returnFocus = root.activeElement;
@@ -215,14 +219,11 @@
       open,
       setMessage,
       async initialize() {
+        let user = null;
         try {
-          const user = await controller.initialize();
-          if (user) {
-            setSignedIn(user);
-            await options.onSignedIn?.(user, { source: "session" });
-          }
-          return user;
+          user = await controller.initialize();
         } catch (error) {
+          if (openButton) openButton.querySelector("span")?.replaceChildren("不可用");
           setMessage(error.message || "后端初始化失败", true);
           emailForm.querySelectorAll("input, button").forEach((element) => {
             element.disabled = true;
@@ -230,6 +231,18 @@
           options.onError?.(error);
           return null;
         }
+        if (!user) {
+          setSignedOut();
+          return null;
+        }
+        setSignedIn(user);
+        try {
+          await options.onSignedIn?.(user, { source: "session" });
+        } catch (error) {
+          setMessage(error.message || "已登录，但档案数据加载失败", true);
+          options.onError?.(error);
+        }
+        return user;
       }
     };
   }
