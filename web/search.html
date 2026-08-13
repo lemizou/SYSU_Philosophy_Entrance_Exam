@@ -1649,9 +1649,12 @@
     $("sectionFilter").addEventListener("change", applySearch);
     $("sortMode").addEventListener("change", applySearch);
     $("resetStructured").addEventListener("click", () => {
+      $("keyword").value = "";
       $("subject").value = "";
       $("sectionFilter").value = "";
       $("sortMode").value = "relevance";
+      $("tagSearch").value = "";
+      indexFields.forEach((field) => selectedValuesFor(field).splice(0));
       applySearch();
     });
     $("keyword").addEventListener("keydown", (event) => {
