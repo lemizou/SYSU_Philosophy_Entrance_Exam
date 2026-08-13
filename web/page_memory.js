@@ -10,6 +10,17 @@
   const pageName = (value) => value.split("/").pop() || "search.html";
   const currentPage = pageName(location.pathname);
 
+  function currentSectionTarget() {
+    if (currentPage !== "search.html") {
+      return `${currentPage}${location.search}${location.hash}`;
+    }
+    const params = new URLSearchParams(location.search);
+    params.delete("question");
+    params.delete("mode");
+    const query = params.toString();
+    return `${currentPage}${query ? `?${query}` : ""}${location.hash}`;
+  }
+
   function rememberCurrentPage() {
     const key = PAGE_KEYS[currentPage];
     if (!key) return;
@@ -33,7 +44,11 @@
   }
 
   document.addEventListener("click", (event) => {
-    if (event.target.closest(".primary-nav a[href]")) rememberCurrentPage();
+    const link = event.target.closest(".primary-nav a[href]");
+    if (!link) return;
+    rememberCurrentPage();
+    const targetPage = pageName(link.getAttribute("href").split(/[?#]/, 1)[0]);
+    if (targetPage === currentPage) link.setAttribute("href", currentSectionTarget());
   }, true);
   window.addEventListener("pagehide", rememberCurrentPage);
   restoreNavigationTargets();

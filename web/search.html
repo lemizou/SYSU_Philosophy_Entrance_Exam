@@ -679,7 +679,7 @@
   <script src="supabase-config.js?v=2"></script>
   <script src="user_backend.js?v=2"></script>
   <script src="auth_controller.js?v=1"></script>
-  <script src="page_memory.js?v=1"></script>
+  <script src="page_memory.js?v=2"></script>
   <script src="question_actions.js?v=2"></script>
   <script src="note_editor.js?v=1"></script>
   <script>
@@ -1707,12 +1707,14 @@
         prepareTagCatalog(taxonomy);
         populateFilters();
         restoreUrlState(UrlState.parse(window.location.search));
-        const hasExplicitDetail = new URLSearchParams(window.location.search).has("question");
+        const explicitParams = new URLSearchParams(window.location.search);
+        const hasExplicitDetail = explicitParams.has("question");
+        const hasExplicitSearch = [...explicitParams.keys()].some((key) => key !== "question" && key !== "mode");
         let rememberedPane = "";
         try { rememberedPane = localStorage.getItem(SEARCH_PANE_STORAGE_KEY) || ""; } catch (_) {}
         urlStateReady = true;
         applySearch({ historyMode: "replace", restoreQuestion: true });
-        if (!hasExplicitDetail && (rememberedPane === "results" || rememberedPane === "detail")) {
+        if (!hasExplicitDetail && !hasExplicitSearch && (rememberedPane === "results" || rememberedPane === "detail")) {
           setMobilePane(rememberedPane);
         }
         $("keyword").focus();
