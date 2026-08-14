@@ -99,7 +99,14 @@
         }
         const session = backend.getSession();
         if (!session?.access_token) return null;
-        return session.user?.id ? session.user : backend.hydrateUser();
+        if (session.user?.id) return session.user;
+        try {
+          return await backend.hydrateUser();
+        } catch (_) {
+          // Clear an expired browser session so a fresh OTP can be requested.
+          await backend.signOut();
+          return null;
+        }
       },
       requestOtp(email) {
         return backend.requestOtp(email);
@@ -173,7 +180,10 @@
     emailForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       const button = event.currentTarget.querySelector("button");
+      const idleLabel = button.textContent;
       button.disabled = true;
+      button.textContent = "发送中…";
+      setMessage("正在发送验证码，请稍候。", false);
       try {
         pendingEmail = await controller.requestOtp(emailInput.value);
         otpInput.disabled = false;
@@ -185,6 +195,7 @@
         setMessage(error.message || "验证码发送失败", true);
       } finally {
         button.disabled = false;
+        button.textContent = idleLabel;
       }
     });
 
