@@ -102,6 +102,14 @@
       .format(new Date(value));
   }
 
+  function truncateText(value, limit) {
+    const normalized = String(value || "").trim().replace(/\s+/g, " ");
+    const characters = Array.from(normalized);
+    return characters.length > limit
+      ? `${characters.slice(0, limit).join("")}……`
+      : normalized;
+  }
+
   function renderResume(recentViews = [], notes = []) {
     const recent = recentViews[0];
     if (!recent) {
@@ -127,11 +135,11 @@
       : "—";
     byId("resumeMeta").replaceChildren(...[question.subject, question.year, question.section].map((value) =>
       Object.assign(document.createElement("span"), { textContent: value })));
-    byId("resumeTitle").textContent = `${question.question}${question.passage || ""}`;
+    byId("resumeTitle").textContent = truncateText(`${question.question}${question.passage || ""}`, 48);
     const note = notes.find((item) => item.question_id === recent.question_id);
     const noteText = note?.content?.trim() || "";
     byId("resumeSummary").textContent = noteText
-      ? `笔记摘要：${noteText.replace(/\s+/g, " ").slice(0, 90)}${noteText.length > 90 ? "……" : ""}`
+      ? `笔记摘要：${truncateText(noteText, 84)}`
       : `已查看 ${recent.view_count || 1} 次，继续复习这道题。`;
     byId("resumeAction").href = `search.html?question=${encodeURIComponent(recent.question_id)}${note ? "&mode=note" : ""}`;
     byId("resumeAction").textContent = "继续阅读";
@@ -379,7 +387,8 @@
     applyNoteFilters,
     renderFavorites,
     renderNotes,
-    renderResume
+    renderResume,
+    truncateText
   };
   initialize();
 })();
