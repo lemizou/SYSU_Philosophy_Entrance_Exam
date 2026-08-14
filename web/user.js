@@ -180,6 +180,16 @@
         list.insertBefore(item, empty);
         if (matches) visible += 1;
       });
+      if (scope === "notes") {
+        const editor = byId("noteEditor");
+        const selected = items.find((item) => item.classList.contains("active") && !item.hidden);
+        if (selected) {
+          selected.after(editor);
+          editor.hidden = false;
+        } else {
+          editor.hidden = true;
+        }
+      }
       if (items.length && visible === 0) {
         empty.innerHTML = "<p>没有符合当前条件的结果。</p>";
       }
@@ -201,6 +211,9 @@
   function selectNote(note, button) {
     document.querySelectorAll(".note-choice").forEach((item) => item.classList.remove("active"));
     button.classList.add("active");
+    const editor = byId("noteEditor");
+    button.after(editor);
+    editor.hidden = false;
     activeNote = note;
     const question = questionFor(note.question_id);
     byId("noteTitle").textContent = question.question;
@@ -253,6 +266,7 @@
   function renderNotes(rows) {
     const list = byId("noteResults");
     const empty = list.querySelector(".note-empty");
+    byId("noteEditor").hidden = true;
     list.querySelectorAll(".note-choice").forEach((item) => item.remove());
     empty.innerHTML = rows.length ? "<p>没有符合当前条件的笔记。</p>" : `
       <strong>还没有私人笔记</strong>

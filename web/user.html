@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>中大哲学 · 个人档案</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="user.css?v=31">
+  <link rel="stylesheet" href="user.css?v=32">
 </head>
 <body>
   <header class="site-header">
@@ -102,14 +102,14 @@
           <div class="note-index">
             <div class="note-results" id="noteResults">
               <div class="personal-empty note-empty"><p>登录后显示你的笔记。</p></div>
+              <div class="note-editor" id="noteEditor" hidden>
+                <p id="noteMeta">尚未选择题目</p>
+                <h4 id="noteTitle">私人笔记</h4>
+                <label for="noteContent">私人笔记</label>
+                <textarea id="noteContent" disabled placeholder="登录并选择一篇笔记后编辑"></textarea>
+                <div class="editor-footer"><small>支持基础 Markdown · 自动保存到私人后端</small><a id="noteSourceLink" href="search.html" hidden>查看原题</a><button type="button" id="saveNote" disabled>保存笔记</button></div>
+              </div>
             </div>
-          </div>
-          <div class="note-editor">
-            <p id="noteMeta">尚未选择题目</p>
-            <h4 id="noteTitle">私人笔记</h4>
-            <label for="noteContent">私人笔记</label>
-            <textarea id="noteContent" disabled placeholder="登录并选择一篇笔记后编辑"></textarea>
-            <div class="editor-footer"><small>支持基础 Markdown · 自动保存到私人后端</small><a id="noteSourceLink" href="search.html" hidden>查看原题</a><button type="button" id="saveNote" disabled>保存笔记</button></div>
           </div>
         </div>
       </section>
@@ -146,6 +146,6 @@
   <script src="supabase-config.js?v=2"></script>
   <script src="user_backend.js?v=4"></script>
   <script src="auth_controller.js?v=4"></script>
-  <script src="user.js?v=22"></script>
+  <script src="user.js?v=23"></script>
 </body>
 </html>
