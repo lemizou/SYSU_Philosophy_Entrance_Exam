@@ -92,5 +92,14 @@
     return `${prefix}${highlight(excerpt, terms, canonicalize, escapeHtml)}${suffix}`;
   }
 
-  global.SearchHighlight = { hasMatch, highlight, normalize, ranges, snippet };
+  function excerpt(value, escapeHtml, limit = 72) {
+    const normalized = String(value ?? "").trim().replace(/\s+/gu, " ");
+    const characters = Array.from(normalized);
+    const shortened = characters.length > limit
+      ? `${characters.slice(0, limit).join("")}……`
+      : normalized;
+    return escapeHtml(shortened);
+  }
+
+  global.SearchHighlight = { excerpt, hasMatch, highlight, normalize, ranges, snippet };
 })(typeof window === "undefined" ? globalThis : window);
