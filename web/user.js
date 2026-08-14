@@ -244,6 +244,7 @@
     byId("noteMeta").textContent = `${question.subject} · ${question.year} · ${question.section}`;
     byId("noteContent").value = note.content;
     byId("noteContent").disabled = false;
+    byId("noteContent").placeholder = "在这里写下你的理解或复习线索";
     byId("saveNote").disabled = false;
     byId("noteSourceLink").href = `search.html?question=${encodeURIComponent(note.question_id)}&mode=note`;
     byId("noteSourceLink").hidden = false;
@@ -310,6 +311,7 @@
     if (!rows.length) {
       byId("noteContent").value = "";
       byId("noteContent").disabled = true;
+      byId("noteContent").placeholder = "登录并选择一篇笔记后编辑";
       byId("saveNote").disabled = true;
       byId("noteSourceLink").hidden = true;
     }
@@ -348,8 +350,9 @@
         backend.addFavorite(noteToSave.question_id)
       ]);
       const favoriteAt = noteToSave.favorite_at || favorite?.created_at || new Date().toISOString();
+      Object.assign(noteToSave, saved || {}, { content, favorite_at: favoriteAt });
       if (activeNote?.question_id === noteToSave.question_id) {
-        activeNote = { ...(saved || noteToSave), favorite_at: favoriteAt };
+        activeNote = noteToSave;
         const activeButton = document.querySelector(".note-choice.active");
         if (activeButton) {
           activeButton.dataset.date = formatDateKey(favoriteAt);
@@ -370,6 +373,7 @@
   }
 
   byId("noteContent").addEventListener("input", () => {
+    if (activeNote) activeNote.content = byId("noteContent").value;
     byId("saveStatus").textContent = "等待保存…";
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => saveActiveNote().catch(() => {}), 800);
