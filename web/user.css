@@ -266,7 +266,7 @@ footer a:hover { border-bottom-color: var(--muted); color: var(--ink); }
   .personal-search { height: 36px; margin-bottom: 6px; }
   .personal-search span { display: none; }
   .personal-search input { padding: 0 11px; font-size: 10px; }
-  .personal-filter-strip { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 4px; padding-top: 4px; border-bottom: 0; }
+  .personal-filter-strip { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 4px; margin-bottom: 3px; padding: 4px 0 0; border-bottom: 0; }
   .personal-filter-control { gap: 2px; font-size: 8px; }
   .personal-filter-control select,
   .personal-filter-control input { min-height: 29px; padding: 0 5px; font-size: 8px; }
