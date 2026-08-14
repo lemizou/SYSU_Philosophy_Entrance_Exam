@@ -25,16 +25,17 @@
       searchOptions: {
         boost: { question: 8, concepts: 6, tags: 5, passage: 2 },
         prefix: true,
-        fuzzy: (term) => term.length >= 4 ? 0.24 : false
+        fuzzy: (term) => term.length >= 4 && !/^\d{4}$/u.test(term) ? 0.24 : false
       }
     });
     index.addAll(questions.map((question) => ({
       id: question.id,
       question: question.question || "",
-      passage: question.passage || "",
+      passage: global.SearchEngine?.searchableText(question)
+        || [question.passage, question.section_instruction].filter(Boolean).join(" "),
       concepts: aliases.conceptsFor(question).join(" "),
-      tags: ["philosophers", "schools", "periods", "topics", "works"]
-        .flatMap((field) => question[field] || []).join(" ")
+      tags: [question.year, ...["philosophers", "schools", "periods", "topics", "works"]
+        .flatMap((field) => question[field] || [])].filter(Boolean).join(" ")
     })));
     return {
       search(query) {
@@ -58,7 +59,7 @@
       searchOptions: {
         boost: { text: 8, concepts: 6 },
         prefix: true,
-        fuzzy: (term) => term.length >= 4 ? 0.24 : false
+        fuzzy: (term) => term.length >= 4 && !/^\d{4}$/u.test(term) ? 0.24 : false
       }
     });
     index.addAll(records.map((record) => ({
@@ -69,12 +70,16 @@
     return {
       search(query) {
         if (!String(query || "").trim()) return new Set(records.map((record) => record.id));
-        const results = index.search(query);
-        const minimumScore = (results[0]?.score || 0) * 0.05;
-        return new Set(results
-          .filter((result) => result.score >= minimumScore)
-          .slice(0, 50)
-          .map((result) => result.id));
+        const groups = String(query).trim().split(/\s+/u).map((term) => {
+          const results = index.search(term);
+          const minimumScore = (results[0]?.score || 0) * 0.05;
+          return new Set(results
+            .filter((result) => result.score >= minimumScore)
+            .slice(0, 50)
+            .map((result) => result.id));
+        });
+        return new Set([...groups[0]].filter((id) =>
+          groups.slice(1).every((group) => group.has(id))));
       }
     };
   }

@@ -156,7 +156,7 @@
       const searchIndex = query && personalSearchReady
         ? window.SearchIndex.createRecords(items.map((item, index) => ({
           id: item.dataset.searchId || `${scope}-${index}`,
-          text: item.dataset.search || ""
+          text: `${item.dataset.search || ""} ${item.dataset.year || ""}`
         })), personalSearchAliases)
         : null;
       const matchedIds = searchIndex ? searchIndex.search(query) : null;
@@ -173,7 +173,7 @@
         const searchId = item.dataset.searchId || `${scope}-${items.indexOf(item)}`;
         const matches = (!query || (matchedIds
           ? matchedIds.has(searchId)
-          : (item.dataset.search || "").toLowerCase().includes(query)))
+            : `${item.dataset.search || ""} ${item.dataset.year || ""}`.toLowerCase().includes(query)))
           && (!subject || item.dataset.subject === subject)
           && (!section || item.dataset.section === section);
         item.hidden = !matches;
@@ -226,7 +226,7 @@
       const item = document.createElement("article");
       item.dataset.originalOrder = String(index);
       item.dataset.searchId = `favorite-${row.question_id}`;
-      item.dataset.search = `${question.question} ${question.passage || ""} ${question.subject} ${(question.philosophers || []).join(" ")}`;
+      item.dataset.search = window.SearchEngine.searchableText(question);
       item.dataset.subject = question.subject;
       item.dataset.section = question.section;
       item.dataset.year = question.year;
@@ -266,7 +266,7 @@
       button.type = "button";
       button.dataset.originalOrder = String(index);
       button.dataset.searchId = `note-${note.question_id}`;
-      button.dataset.search = `${question.question} ${question.subject} ${note.content}`;
+      button.dataset.search = `${window.SearchEngine.searchableText(question)} ${note.content}`;
       button.dataset.subject = question.subject;
       button.dataset.section = question.section;
       button.dataset.year = question.year;

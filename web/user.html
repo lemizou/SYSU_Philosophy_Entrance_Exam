@@ -75,7 +75,7 @@
       </section>
 
       <section class="view-panel" id="favoritesView" data-panel="favorites" hidden>
-        <label class="personal-search"><span>检索收藏</span><input type="search" data-personal-search="favorites" autocomplete="off" placeholder="题目、人物或考点"></label>
+        <label class="personal-search"><span>检索收藏</span><input type="search" data-personal-search="favorites" autocomplete="off" placeholder="年份、题目、人物或考点"></label>
         <div class="personal-filter-strip" data-filter-scope="favorites" aria-label="收藏筛选和排序">
           <div class="personal-filter-title">检索条件</div>
           <label class="personal-filter-control"><span>题型</span><select data-filter-field="section"><option value="">全部题型</option><option value="第一类">第一类</option><option value="第二类">第二类</option><option value="第三类">第三类</option></select></label>
@@ -90,7 +90,7 @@
 
       <section class="view-panel" id="notesView" data-panel="notes" hidden>
         <span id="saveStatus" aria-live="polite" hidden>所有更改已保存</span>
-        <label class="personal-search"><span>检索笔记</span><input id="noteSearch" type="search" data-personal-search="notes" autocomplete="off" placeholder="题目、人物或考点"></label>
+        <label class="personal-search"><span>检索笔记</span><input id="noteSearch" type="search" data-personal-search="notes" autocomplete="off" placeholder="年份、题目、人物或考点"></label>
         <div class="personal-filter-strip" data-filter-scope="notes" aria-label="笔记筛选和排序">
           <div class="personal-filter-title">检索条件</div>
           <label class="personal-filter-control"><span>题型</span><select data-filter-field="section"><option value="">全部题型</option><option value="第一类">第一类</option><option value="第二类">第二类</option><option value="第三类">第三类</option></select></label>
@@ -141,10 +141,11 @@
   <script src="page_memory.js?v=2"></script>
   <script src="vendor/minisearch-7.2.0.js"></script>
   <script src="concept_aliases.js"></script>
-  <script src="search_index.js"></script>
+  <script src="search_index.js?v=3"></script>
+  <script src="search_engine.js?v=3"></script>
   <script src="supabase-config.js?v=2"></script>
   <script src="user_backend.js?v=4"></script>
   <script src="auth_controller.js?v=4"></script>
-  <script src="user.js?v=20"></script>
+  <script src="user.js?v=22"></script>
 </body>
 </html>

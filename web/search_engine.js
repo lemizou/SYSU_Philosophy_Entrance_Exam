@@ -25,15 +25,28 @@
     };
   }
 
+  function searchableValues(question = {}) {
+    return [
+      String(question.year || ""),
+      question.subject,
+      question.section,
+      question.number ? `第${question.number}题` : "",
+      question.question,
+      question.passage,
+      question.section_instruction,
+      ...TAG_FIELDS.flatMap((field) => question[field] || [])
+    ].filter(Boolean);
+  }
+
+  function searchableText(question) {
+    return searchableValues(question).join(" ");
+  }
+
   function matches(question, conditions, canonicalize, expandTerm = (term) => [term]) {
     const keywordQuery = conditions.keywordQuery
       || global.SearchQuery.parse(conditions.keyword || "");
     if (keywordQuery.positiveGroups.length || keywordQuery.excludedTerms.length) {
-      const searchable = [
-        question.question,
-        question.passage,
-        ...TAG_FIELDS.flatMap((field) => question[field] || [])
-      ].map(normalize);
+      const searchable = searchableValues(question).map(normalize);
       const contains = (term) => {
         const needles = expandTerm(term).flatMap((variant) => [
           normalize(variant),
@@ -80,6 +93,8 @@
     normalizeSubject,
     createAliasMap,
     createCanonicalizer,
+    searchableValues,
+    searchableText,
     matches,
     filter
   };
