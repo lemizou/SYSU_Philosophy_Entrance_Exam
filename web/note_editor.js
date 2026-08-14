@@ -8,8 +8,8 @@
   const DRAFT_PREFIX = "sysu-note-draft-v1:";
   const SAVE_DELAY_MS = 800;
 
-  function draftKey(questionId, userId = "anonymous") {
-    return `${DRAFT_PREFIX}${userId || "anonymous"}:${questionId}`;
+  function draftKey(questionId, userId) {
+    return `${DRAFT_PREFIX}${userId}:${questionId}`;
   }
 
   function readDraft(storage, questionId, userId) {
@@ -36,7 +36,7 @@
     let state = null;
     let timer = null;
 
-    function userId() { return authController.getSession()?.user?.id || "anonymous"; }
+    function userId() { return authController.getSession()?.user?.id || null; }
     function element() {
       const node = root.querySelector("[data-question-note]");
       return node?.dataset.questionId === state?.questionId ? node : null;
@@ -83,8 +83,8 @@
       resizeInput(view.input);
       view.status.textContent = state.message;
       view.status.classList.toggle("error", state.error);
-      view.sync.textContent = userId() === "anonymous" ? "登录并同步" : "立即保存";
-      view.sync.disabled = state.saving || !state.content.trim();
+      view.sync.textContent = "立即保存";
+      view.sync.disabled = !userId() || state.saving || !state.content.trim();
       view.remove.hidden = !state.cloudExists;
       view.remove.disabled = state.saving;
       view.conflict.hidden = !state.conflict;
@@ -92,20 +92,10 @@
       view.input.setAttribute("aria-invalid", String(state.content.length > 50000));
       root.querySelector("[data-note-action]")?.setAttribute?.("aria-expanded", String(state.open));
     }
-    function migrateAnonymousDraft() {
-      if (!state || userId() === "anonymous") return;
-      const anonymous = readDraft(storage, state.questionId, "anonymous");
-      const personal = readDraft(storage, state.questionId, userId());
-      if (anonymous && (!personal || anonymous.updatedAt >= personal.updatedAt)) {
-        try {
-          storage?.setItem(draftKey(state.questionId, userId()), JSON.stringify(anonymous));
-          storage?.removeItem(draftKey(state.questionId, "anonymous"));
-        } catch (_) {}
-      }
-    }
     function activate(questionId, config = {}) {
       if (timer) cancel(timer);
-      const local = readDraft(storage, questionId, userId()) || readDraft(storage, questionId, "anonymous");
+      const owner = userId();
+      const local = owner ? readDraft(storage, questionId, owner) : null;
       state = {
         questionId,
         content: local?.content || "",
@@ -114,11 +104,17 @@
         cloudExists: false,
         conflict: false,
         saving: false,
-        open: Boolean(config.open),
+        open: Boolean(config.open && owner),
         message: local ? "本地草稿" : "",
         error: false
       };
       render();
+      if (config.open && !owner) {
+        authController.requireUser({
+          type: "open-note", questionId, returnUrl: location.href
+        });
+        authUi.open();
+      }
       if (state.open) parts()?.input.focus();
       return { ...state };
     }
@@ -129,6 +125,13 @@
     }
     function open(questionId) {
       if (!state || state.questionId !== questionId) activate(questionId, { open: true });
+      if (!userId()) {
+        authController.requireUser({
+          type: "open-note", questionId, returnUrl: location.href
+        });
+        authUi.open();
+        return;
+      }
       state.open = true;
       render();
       parts()?.input.focus();
@@ -141,8 +144,7 @@
       options.onClose?.(state.questionId);
     }
     function applyCloudNote(questionId, note) {
-      if (!state || state.questionId !== questionId || userId() === "anonymous") return;
-      migrateAnonymousDraft();
+      if (!state || state.questionId !== questionId || !userId()) return;
       const local = readDraft(storage, questionId, userId());
       const cloud = note?.content || "";
       state.cloudContent = cloud;
@@ -162,17 +164,17 @@
     }
     function queueSave() {
       if (timer) cancel(timer);
-      if (userId() === "anonymous" || !state?.content.trim() || state.conflict) return;
+      if (!userId() || !state?.content.trim() || state.conflict) return;
       timer = schedule(() => { timer = null; save(); }, SAVE_DELAY_MS);
     }
     function input(content) {
-      if (!state) return;
+      if (!state || !userId()) return;
       state.content = String(content ?? "");
       state.dirty = true;
       state.conflict = false;
       const stored = persistLocal(state.content);
       state.message = stored
-        ? (userId() === "anonymous" ? "本地草稿" : (state.content.trim() ? "等待保存" : "请使用删除按钮移除云端笔记"))
+        ? (state.content.trim() ? "等待保存" : "请使用删除按钮移除云端笔记")
         : "无法写入本地草稿，请复制内容后重试";
       state.error = !stored;
       render();
@@ -185,13 +187,11 @@
         return null;
       }
       if (!authController.requireUser({
-        type: "save-note", questionId: state.questionId, returnUrl: location.href
+        type: "open-note", questionId: state.questionId, returnUrl: location.href
       })) {
-        persistLocal(state.content, "anonymous");
         authUi.open();
         return null;
       }
-      migrateAnonymousDraft();
       state.saving = true;
       setStatus("保存中");
       const questionId = state.questionId;
@@ -218,17 +218,9 @@
         if (state?.questionId === questionId) { state.saving = false; render(); }
       }
     }
-    async function resumeAfterLogin(action) {
-      if (!state || state.questionId !== action.questionId) throw new Error("笔记尚未准备好");
-      migrateAnonymousDraft();
-      const local = readDraft(storage, state.questionId, userId());
-      if (local) state.content = local.content;
-      render();
-      return save();
-    }
     async function remove() {
       if (!state?.cloudExists || !authController.getSession()?.user) return null;
-      if (confirmDelete && !confirmDelete("确定删除这篇云端笔记？本地未保存内容仍会保留。")) return null;
+      if (confirmDelete && !confirmDelete("确定删除这篇云端笔记？")) return null;
       state.saving = true;
       setStatus("删除中");
       try {
@@ -268,7 +260,7 @@
       }
     });
 
-    return { activate, deactivate, open, close, input, save, remove, applyCloudNote, resizeInput, resumeAfterLogin, getState: () => state ? { ...state } : null };
+    return { activate, deactivate, open, close, input, save, remove, applyCloudNote, resizeInput, getState: () => state ? { ...state } : null };
   }
 
   return { DRAFT_PREFIX, SAVE_DELAY_MS, draftKey, readDraft, createNoteEditor };

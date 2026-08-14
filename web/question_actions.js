@@ -153,6 +153,10 @@
         questionId: state.questionId,
         returnUrl: noteReturnUrl(state.questionId)
       };
+      if (!authController.requireUser(action)) {
+        authUi.open();
+        return null;
+      }
       await options.onOpenNote?.(action, state);
       return state;
     }

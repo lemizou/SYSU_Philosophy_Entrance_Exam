@@ -7,7 +7,7 @@
 
   const PENDING_ACTION_KEY = "sysu-pending-action-v1";
   const PENDING_ACTION_TTL_MS = 30 * 60 * 1000;
-  const ACTION_TYPES = new Set(["favorite", "open-note", "save-note"]);
+  const ACTION_TYPES = new Set(["favorite", "open-note"]);
 
   function createAuthController(options = {}) {
     const backend = options.backend;

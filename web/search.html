@@ -691,10 +691,10 @@
   <script src="url_state.js"></script>
   <script src="supabase-config.js?v=2"></script>
   <script src="user_backend.js?v=2"></script>
-  <script src="auth_controller.js?v=1"></script>
+  <script src="auth_controller.js?v=5"></script>
   <script src="page_memory.js?v=2"></script>
-  <script src="question_actions.js?v=3"></script>
-  <script src="note_editor.js?v=3"></script>
+  <script src="question_actions.js?v=4"></script>
+  <script src="note_editor.js?v=4"></script>
   <script>
     const $ = (id) => document.getElementById(id);
     let questions = [];
@@ -743,12 +743,6 @@
         await questionActions?.activate(completed.questionId);
       }
       return completed;
-    }
-
-    async function resumePendingNote() {
-      return questionAuthController?.runPendingAction({
-        "save-note": (action) => questionNoteEditor.resumeAfterLogin(action)
-      });
     }
 
     async function initializeQuestionAuth() {
@@ -1408,24 +1402,23 @@
           </div>
           <textarea class="note-editor-content" data-note-content maxlength="50000" aria-describedby="questionNoteHint questionNoteCount" placeholder="写下你的理解、疑问或复习线索……"></textarea>
           <div class="note-editor-conflict" data-note-conflict hidden>
-            本地草稿与云端版本不同。默认保留本地内容，不会自动覆盖。
+            本机草稿与云端版本不同。默认保留本机内容，不会自动覆盖。
             <div class="note-conflict-actions">
-              <button class="note-editor-button" type="button" data-note-keep-local>保留本地草稿</button>
+              <button class="note-editor-button" type="button" data-note-keep-local>保留本机草稿</button>
               <button class="note-editor-button" type="button" data-note-use-cloud>恢复云端版本</button>
             </div>
           </div>
           <div class="note-editor-foot">
-            <span class="note-editor-hint" id="questionNoteHint">写下笔记自动收藏，草稿先保存在本机；登录后可跨设备同步，文字自动保存。</span>
+            <span class="note-editor-hint" id="questionNoteHint">文字自动保存到私人档案；写笔记时自动收藏该题。</span>
             <span class="note-editor-count" id="questionNoteCount" data-note-count>0 / 50,000</span>
             <button class="note-editor-button note-editor-delete" type="button" data-note-delete hidden>删除云端笔记</button>
-            <button class="note-editor-button note-editor-sync" type="button" data-note-sync>登录并同步</button>
+            <button class="note-editor-button note-editor-sync" type="button" data-note-sync>立即保存</button>
           </div>
         </section>`;
       $("detail").scrollTop = 0;
       questionNoteEditor?.activate(q.id, { open: activeQuestionMode === "note" });
       questionActions?.activate(q.id).then((state) => {
         questionNoteEditor?.applyCloudNote(q.id, state?.note);
-        resumePendingNote().catch(() => {});
       });
     }
 
