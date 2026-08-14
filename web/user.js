@@ -373,7 +373,15 @@
   }
 
   byId("noteContent").addEventListener("input", () => {
-    if (activeNote) activeNote.content = byId("noteContent").value;
+    if (activeNote) {
+      activeNote.content = byId("noteContent").value;
+      const activeButton = document.querySelector(".note-choice.active");
+      if (activeButton) {
+        activeButton.dataset.search = `${window.SearchEngine.searchableText(
+          questionFor(activeNote.question_id)
+        )} ${activeNote.content}`;
+      }
+    }
     byId("saveStatus").textContent = "等待保存…";
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => saveActiveNote().catch(() => {}), 800);
