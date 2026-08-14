@@ -99,11 +99,11 @@
         }
         const session = backend.getSession();
         if (!session?.access_token) return null;
-        if (session.user?.id) return session.user;
         try {
           return await backend.hydrateUser();
         } catch (_) {
-          // Clear an expired browser session so a fresh OTP can be requested.
+          // Never present a cached user as signed in when Supabase can no
+          // longer validate the session used to load private data.
           await backend.signOut();
           return null;
         }

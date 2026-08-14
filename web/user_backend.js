@@ -189,6 +189,7 @@
       },
       async hydrateUser() {
         if (!session?.access_token) return null;
+        await refreshIfNeeded();
         const user = await call("/auth/v1/user");
         persist({ ...session, user });
         return user;
