@@ -171,7 +171,7 @@ main { width: min(1480px,calc(100% - 48px)); height: calc(100dvh - var(--header-
 .drawer-action { width: 100%; min-height: 41px; margin-bottom: 8px; border: 1px solid var(--line); border-radius: 5px; background: white; color: var(--ink); font-size: 10px; cursor: pointer; }
 .drawer-action:hover { background: var(--soft); }
 .drawer-panel > p { color: var(--muted); font-size: 9px; line-height: 1.6; }
-.toast { position: fixed; left: 50%; bottom: 22px; z-index: 30; padding: 9px 13px; background: var(--ink); color: white; font-size: 9px; opacity: 0; pointer-events: none; transform: translate(-50%,8px); transition: opacity .15s,transform .15s; }
+.toast { position: fixed; left: 50%; bottom: 22px; z-index: 30; padding: 9px 13px; background: #6f7479; color: white; font-size: 9px; opacity: 0; pointer-events: none; transform: translate(-50%,8px); transition: opacity .15s,transform .15s; }
 .toast.visible { opacity: 1; transform: translate(-50%,0); }
 footer { min-height: 22px; display: flex; align-items: center; justify-content: space-between; padding: 5px 1px 1px; color: var(--muted); font-size: 9px; }
 footer a { border-bottom: 1px solid var(--line); color: var(--muted); text-decoration: none; }
