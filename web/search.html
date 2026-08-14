@@ -448,7 +448,7 @@
       margin: -13px 0 21px;
       padding: 14px;
       border: 1px solid var(--ink);
-      background: #fbfaf7;
+      background: transparent;
     }
     .note-editor-head, .note-editor-foot, .note-conflict-actions {
       display: flex;
@@ -464,7 +464,8 @@
       display: block;
       width: 100%;
       min-height: 132px;
-      resize: vertical;
+      overflow-y: hidden;
+      resize: none;
       padding: 10px 11px;
       border: 1px solid var(--line);
       background: white;
@@ -691,8 +692,8 @@
   <script src="user_backend.js?v=2"></script>
   <script src="auth_controller.js?v=1"></script>
   <script src="page_memory.js?v=2"></script>
-  <script src="question_actions.js?v=2"></script>
-  <script src="note_editor.js?v=1"></script>
+  <script src="question_actions.js?v=3"></script>
+  <script src="note_editor.js?v=3"></script>
   <script>
     const $ = (id) => document.getElementById(id);
     let questions = [];
@@ -766,6 +767,9 @@
           backend: questionBackend,
           authController: questionAuthController,
           authUi: questionAuthUi,
+          onSaved({ questionId }) {
+            questionActions?.markFavorite(questionId);
+          },
           onClose() {
             activeQuestionMode = "";
             syncUrlState("replace");
@@ -1410,7 +1414,7 @@
             </div>
           </div>
           <div class="note-editor-foot">
-            <span class="note-editor-hint" id="questionNoteHint">草稿先保存在本机；登录后可跨设备同步，文字自动保存。</span>
+            <span class="note-editor-hint" id="questionNoteHint">写下笔记自动收藏，草稿先保存在本机；登录后可跨设备同步，文字自动保存。</span>
             <span class="note-editor-count" id="questionNoteCount" data-note-count>0 / 50,000</span>
             <button class="note-editor-button note-editor-delete" type="button" data-note-delete hidden>删除云端笔记</button>
             <button class="note-editor-button note-editor-sync" type="button" data-note-sync>登录并同步</button>

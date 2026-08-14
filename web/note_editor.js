@@ -70,11 +70,17 @@
       state.error = error;
       render();
     }
+    function resizeInput(input) {
+      if (!input?.style) return;
+      input.style.height = "auto";
+      if (Number(input.scrollHeight) > 0) input.style.height = `${input.scrollHeight}px`;
+    }
     function render() {
       const view = parts();
       if (!view || !state) return;
       view.node.hidden = !state.open;
       if (view.input.value !== state.content) view.input.value = state.content;
+      resizeInput(view.input);
       view.status.textContent = state.message;
       view.status.classList.toggle("error", state.error);
       view.sync.textContent = userId() === "anonymous" ? "登录并同步" : "立即保存";
@@ -191,7 +197,10 @@
       const questionId = state.questionId;
       const content = state.content;
       try {
-        const saved = await backend.saveNote(questionId, content);
+        const [saved] = await Promise.all([
+          backend.saveNote(questionId, content),
+          backend.addFavorite(questionId)
+        ]);
         if (state?.questionId !== questionId) return saved;
         state.cloudContent = content;
         state.cloudExists = true;
@@ -199,6 +208,7 @@
         state.conflict = false;
         try { storage?.removeItem(draftKey(questionId, userId())); } catch (_) {}
         setStatus("已保存");
+        options.onSaved?.({ questionId, note: saved, favorited: true });
         backend.recordActivity?.().catch(() => {});
         return saved;
       } catch (error) {
@@ -258,7 +268,7 @@
       }
     });
 
-    return { activate, deactivate, open, close, input, save, remove, applyCloudNote, resumeAfterLogin, getState: () => state ? { ...state } : null };
+    return { activate, deactivate, open, close, input, save, remove, applyCloudNote, resizeInput, resumeAfterLogin, getState: () => state ? { ...state } : null };
   }
 
   return { DRAFT_PREFIX, SAVE_DELAY_MS, draftKey, readDraft, createNoteEditor };

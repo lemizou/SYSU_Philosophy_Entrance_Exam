@@ -105,6 +105,12 @@
       state = null;
     }
 
+    function markFavorite(questionId) {
+      if (!state || state.questionId !== questionId) return;
+      state.favorite = true;
+      render();
+    }
+
     async function handleFavorite() {
       if (!state || state.loading || state.busy) return null;
       if (!authController.requireUser({
@@ -162,6 +168,7 @@
     return {
       activate,
       deactivate,
+      markFavorite,
       getState: () => state ? { ...state } : null,
       handleFavorite,
       handleNote,

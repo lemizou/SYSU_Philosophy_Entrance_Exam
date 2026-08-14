@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>中大哲学 · 个人档案</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="user.css?v=32">
+  <link rel="stylesheet" href="user.css?v=33">
 </head>
 <body>
   <header class="site-header">
@@ -31,8 +31,7 @@
         <p>档案目录</p>
         <nav aria-label="个人档案栏目">
           <button class="index-button active" type="button" data-view="overview" aria-pressed="true"><span>概览</span><small>今日</small></button>
-          <button class="index-button" type="button" data-view="favorites" aria-pressed="false"><span>我的收藏</span><small id="favoriteNavCount">—</small></button>
-          <button class="index-button" type="button" data-view="notes" aria-pressed="false"><span>我的笔记</span><small id="noteNavCount">—</small></button>
+          <button class="index-button" type="button" data-view="library" aria-pressed="false"><span>收藏与笔记</span><small id="libraryNavCount">—</small></button>
           <button class="index-button account-trigger" id="openAuthDialog" type="button" aria-haspopup="dialog"><span>载入中</span><small>私人</small></button>
         </nav>
         <div class="privacy-note">
@@ -74,34 +73,21 @@
 
       </section>
 
-      <section class="view-panel" id="favoritesView" data-panel="favorites" hidden>
-        <label class="personal-search"><span>检索收藏</span><input type="search" data-personal-search="favorites" autocomplete="off" placeholder="年份、题目、人物或考点"></label>
-        <div class="personal-filter-strip" data-filter-scope="favorites" aria-label="收藏筛选和排序">
-          <div class="personal-filter-title">检索条件</div>
-          <label class="personal-filter-control"><span>题型</span><select data-filter-field="section"><option value="">全部题型</option><option value="第一类">第一类</option><option value="第二类">第二类</option><option value="第三类">第三类</option></select></label>
-          <label class="personal-filter-control"><span>科目</span><select data-filter-field="subject"><option value="">全部科目</option><option value="中国哲学史">中国哲学史</option><option value="外国哲学史">外国哲学史</option></select></label>
-          <label class="personal-filter-control"><span>结果排序</span><select data-filter-field="sort"><option value="relevance">相关度</option><option value="year_desc">年份从新到旧</option><option value="year_asc">年份从旧到新</option></select></label>
-          <button class="reset-personal-filters" type="button">重置条件</button>
-        </div>
-        <div class="archive-list" id="favoriteList">
-          <div class="personal-empty filter-empty"><p>登录后显示你的收藏。</p></div>
-        </div>
-      </section>
-
-      <section class="view-panel" id="notesView" data-panel="notes" hidden>
+      <section class="view-panel" id="libraryView" data-panel="library" hidden>
         <span id="saveStatus" aria-live="polite" hidden>所有更改已保存</span>
-        <label class="personal-search"><span>检索笔记</span><input id="noteSearch" type="search" data-personal-search="notes" autocomplete="off" placeholder="年份、题目、人物或考点"></label>
-        <div class="personal-filter-strip" data-filter-scope="notes" aria-label="笔记筛选和排序">
+        <label class="personal-search"><span>检索收藏与笔记</span><input id="noteSearch" type="search" data-personal-search="library" autocomplete="off" placeholder="年份、题目、人物或考点"></label>
+        <div class="personal-filter-strip" data-filter-scope="library" aria-label="收藏与笔记筛选和排序">
           <div class="personal-filter-title">检索条件</div>
           <label class="personal-filter-control"><span>题型</span><select data-filter-field="section"><option value="">全部题型</option><option value="第一类">第一类</option><option value="第二类">第二类</option><option value="第三类">第三类</option></select></label>
           <label class="personal-filter-control"><span>科目</span><select data-filter-field="subject"><option value="">全部科目</option><option value="中国哲学史">中国哲学史</option><option value="外国哲学史">外国哲学史</option></select></label>
           <label class="personal-filter-control"><span>结果排序</span><select data-filter-field="sort"><option value="relevance">相关度</option><option value="year_desc">年份从新到旧</option><option value="year_asc">年份从旧到新</option></select></label>
+          <label class="personal-filter-control"><span>日期</span><select data-filter-field="date" aria-label="按收藏日期筛选"><option value="">收藏日期</option></select></label>
           <button class="reset-personal-filters" type="button">重置条件</button>
         </div>
         <div class="note-workspace">
           <div class="note-index">
             <div class="note-results" id="noteResults">
-              <div class="personal-empty note-empty"><p>登录后显示你的笔记。</p></div>
+              <div class="personal-empty note-empty"><p>登录后显示你的收藏与笔记。</p></div>
               <div class="note-editor" id="noteEditor" hidden>
                 <p id="noteMeta">尚未选择题目</p>
                 <h4 id="noteTitle">私人笔记</h4>
@@ -146,6 +132,6 @@
   <script src="supabase-config.js?v=2"></script>
   <script src="user_backend.js?v=4"></script>
   <script src="auth_controller.js?v=4"></script>
-  <script src="user.js?v=23"></script>
+  <script src="user.js?v=24"></script>
 </body>
 </html>

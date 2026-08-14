@@ -9,11 +9,12 @@
   let authUi = null;
   let questions = new Map();
   let activeNote = null;
+  let favoriteQuestionIds = new Set();
   let saveTimer = null;
   let personalSearchAliases = window.ConceptAliases.create([]);
   let personalSearchReady = false;
   const VIEW_STORAGE_KEY = "sysu-user-active-view-v1";
-  const VALID_VIEWS = new Set(["overview", "favorites", "notes"]);
+  const VALID_VIEWS = new Set(["overview", "library"]);
 
   function showToast(message, isError = false) {
     toast.textContent = message;
@@ -41,7 +42,8 @@
   }
 
   try {
-    const savedView = localStorage.getItem(VIEW_STORAGE_KEY);
+    const storedView = localStorage.getItem(VIEW_STORAGE_KEY);
+    const savedView = storedView === "favorites" || storedView === "notes" ? "library" : storedView;
     if (VALID_VIEWS.has(savedView)) showView(savedView, false);
   } catch (_) {}
 
@@ -100,6 +102,16 @@
     if (!value) return "—";
     return new Intl.DateTimeFormat("zh-CN", { month: "2-digit", day: "2-digit" })
       .format(new Date(value));
+  }
+
+  function formatDateKey(value) {
+    if (!value) return "";
+    const date = new Date(value);
+    if (!Number.isFinite(date.getTime())) return "";
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   }
 
   function truncateText(value, limit) {
@@ -163,6 +175,7 @@
       const subject = strip.querySelector('[data-filter-field="subject"]').value;
       const section = strip.querySelector('[data-filter-field="section"]').value;
       const sort = strip.querySelector('[data-filter-field="sort"]').value;
+      const date = strip.querySelector('[data-filter-field="date"]')?.value || "";
       items.sort((a, b) => {
         if (sort === "year_desc") return Number(b.dataset.year) - Number(a.dataset.year);
         if (sort === "year_asc") return Number(a.dataset.year) - Number(b.dataset.year);
@@ -175,12 +188,13 @@
           ? matchedIds.has(searchId)
             : `${item.dataset.search || ""} ${item.dataset.year || ""}`.toLowerCase().includes(query)))
           && (!subject || item.dataset.subject === subject)
-          && (!section || item.dataset.section === section);
+          && (!section || item.dataset.section === section)
+          && (!date || item.dataset.date === date);
         item.hidden = !matches;
         list.insertBefore(item, empty);
         if (matches) visible += 1;
       });
-      if (scope === "notes") {
+      if (scope === "library") {
         const editor = byId("noteEditor");
         const selected = items.find((item) => item.classList.contains("active") && !item.hidden);
         if (selected) {
@@ -205,18 +219,28 @@
     return apply;
   }
 
-  const applyFavoriteFilters = setupFilters("favorites", "#favoriteList", "article", ".filter-empty");
-  const applyNoteFilters = setupFilters("notes", "#noteResults", ".note-choice", ".note-empty");
+  const applyLibraryFilters = setupFilters("library", "#noteResults", ".note-choice", ".note-empty");
 
   function selectNote(note, button) {
+    const editor = byId("noteEditor");
+    if (button.classList.contains("active")) {
+      if (byId("saveStatus").textContent !== "所有更改已保存") {
+        saveActiveNote().catch(() => {});
+      }
+      button.classList.remove("active");
+      editor.hidden = true;
+      activeNote = null;
+      return;
+    }
     document.querySelectorAll(".note-choice").forEach((item) => item.classList.remove("active"));
     button.classList.add("active");
-    const editor = byId("noteEditor");
     button.after(editor);
     editor.hidden = false;
     activeNote = note;
     const question = questionFor(note.question_id);
-    byId("noteTitle").textContent = question.question;
+    byId("noteTitle").textContent = [question.question, question.passage]
+      .filter(Boolean)
+      .join("\n\n");
     byId("noteMeta").textContent = `${question.subject} · ${question.year} · ${question.section}`;
     byId("noteContent").value = note.content;
     byId("noteContent").disabled = false;
@@ -226,52 +250,40 @@
     byId("saveStatus").textContent = "所有更改已保存";
   }
 
-  function renderFavorites(rows) {
-    const list = byId("favoriteList");
-    const empty = list.querySelector(".filter-empty");
-    list.querySelectorAll("article").forEach((item) => item.remove());
-    empty.innerHTML = rows.length ? "<p>没有符合当前条件的收藏。</p>" : `
-      <strong>收藏夹还是空的</strong>
-      <p>从任意题目详情页收藏第一道题，之后可在这里集中复习。</p>
-      <a href="search.html">去真题检索</a>`;
-    rows.forEach((row, index) => {
-      const question = questionFor(row.question_id);
-      const item = document.createElement("article");
-      item.dataset.originalOrder = String(index);
-      item.dataset.searchId = `favorite-${row.question_id}`;
-      item.dataset.search = window.SearchEngine.searchableText(question);
-      item.dataset.subject = question.subject;
-      item.dataset.section = question.section;
-      item.dataset.year = question.year;
-      const link = document.createElement("a");
-      link.className = "favorite-card-link";
-      link.href = `search.html?question=${encodeURIComponent(row.question_id)}`;
-      link.setAttribute("aria-label", `查看原题：${question.question}`);
-      const mark = document.createElement("div");
-      mark.className = "archive-mark";
-      mark.textContent = `F.${String(rows.length - index).padStart(3, "0")}`;
-      const details = document.createElement("div");
-      const meta = document.createElement("p");
-      meta.textContent = `${question.subject} · ${question.year} · ${question.section}`;
-      const title = document.createElement("h4");
-      title.textContent = `${question.question}${question.passage || ""}`;
-      details.append(meta, title);
-      link.append(mark, details);
-      item.append(link);
-      list.insertBefore(item, empty);
-    });
-    applyFavoriteFilters();
-  }
-
-  function renderNotes(rows) {
+  function renderLibrary(favorites, notes) {
     const list = byId("noteResults");
     const empty = list.querySelector(".note-empty");
     byId("noteEditor").hidden = true;
     list.querySelectorAll(".note-choice").forEach((item) => item.remove());
-    empty.innerHTML = rows.length ? "<p>没有符合当前条件的笔记。</p>" : `
-      <strong>还没有私人笔记</strong>
-      <p>打开一道题，在题目末尾写下第一篇理解或复习线索。</p>
-      <a href="search.html">选择题目写笔记</a>`;
+    const notesByQuestion = new Map(notes.map((note) => [note.question_id, note]));
+    const rowsByQuestion = new Map();
+    favorites.forEach((favorite) => rowsByQuestion.set(favorite.question_id, {
+      question_id: favorite.question_id,
+      content: notesByQuestion.get(favorite.question_id)?.content || "",
+      favorite_at: favorite.created_at
+    }));
+    notes.forEach((note) => {
+      const existing = rowsByQuestion.get(note.question_id);
+      rowsByQuestion.set(note.question_id, {
+        ...note,
+        favorite_at: existing?.favorite_at || ""
+      });
+    });
+    const rows = [...rowsByQuestion.values()];
+    const dateFilter = document.querySelector('[data-filter-scope="library"] [data-filter-field="date"]');
+    const dateKeys = [...new Set(rows.map((row) => formatDateKey(row.favorite_at)).filter(Boolean))]
+      .sort((a, b) => b.localeCompare(a));
+    dateFilter.replaceChildren(Object.assign(document.createElement("option"), {
+      value: "",
+      textContent: "收藏日期"
+    }), ...dateKeys.map((key) => Object.assign(document.createElement("option"), {
+      value: key,
+      textContent: key.replaceAll("-", "/")
+    })));
+    empty.innerHTML = rows.length ? "<p>没有符合当前条件的收藏或笔记。</p>" : `
+      <strong>还没有收藏或私人笔记</strong>
+      <p>从真题详情页收藏题目，或写下第一篇复习笔记。</p>
+      <a href="search.html">去真题检索</a>`;
     activeNote = null;
     rows.forEach((note, index) => {
       const question = questionFor(note.question_id);
@@ -279,13 +291,14 @@
       button.className = "note-choice";
       button.type = "button";
       button.dataset.originalOrder = String(index);
-      button.dataset.searchId = `note-${note.question_id}`;
+      button.dataset.searchId = `library-${note.question_id}`;
       button.dataset.search = `${window.SearchEngine.searchableText(question)} ${note.content}`;
       button.dataset.subject = question.subject;
       button.dataset.section = question.section;
       button.dataset.year = question.year;
+      button.dataset.date = formatDateKey(note.favorite_at);
       const date = document.createElement("span");
-      date.textContent = formatDate(note.updated_at);
+      date.textContent = formatDate(note.favorite_at);
       const title = document.createElement("strong");
       title.textContent = question.question;
       const meta = document.createElement("small");
@@ -293,7 +306,6 @@
       button.append(date, title, meta);
       button.addEventListener("click", () => selectNote(note, button));
       list.insertBefore(button, empty);
-      if (index === 0) selectNote(note, button);
     });
     if (!rows.length) {
       byId("noteContent").value = "";
@@ -301,22 +313,24 @@
       byId("saveNote").disabled = true;
       byId("noteSourceLink").hidden = true;
     }
-    applyNoteFilters();
+    applyLibraryFilters();
   }
 
   async function refreshData() {
     const data = await backend.loadMyData();
+    favoriteQuestionIds = new Set(data.favorites.map((row) => row.question_id));
     const stats = data.stats || {};
     const values = {
       favoriteCount: stats.favorite_count ?? data.favorites.length,
       noteCount: stats.note_count ?? data.notes.length,
       activeDayCount: stats.active_day_count ?? data.activity.length,
-      favoriteNavCount: stats.favorite_count ?? data.favorites.length,
-      noteNavCount: stats.note_count ?? data.notes.length
+      libraryNavCount: new Set([
+        ...data.favorites.map((row) => row.question_id),
+        ...data.notes.map((row) => row.question_id)
+      ]).size
     };
     Object.entries(values).forEach(([id, value]) => { byId(id).textContent = value; });
-    renderFavorites(data.favorites);
-    renderNotes(data.notes);
+    renderLibrary(data.favorites, data.notes);
     renderResume(data.recentViews, data.notes);
     renderCalendar(data.activity);
     renderWeeklyFocus(data.favorites, data.notes);
@@ -324,11 +338,28 @@
 
   async function saveActiveNote() {
     if (!activeNote) return;
+    const noteToSave = activeNote;
+    const content = byId("noteContent").value;
     clearTimeout(saveTimer);
     byId("saveStatus").textContent = "保存中…";
     try {
-      const saved = await backend.saveNote(activeNote.question_id, byId("noteContent").value);
-      if (saved) activeNote = saved;
+      const [saved, favorite] = await Promise.all([
+        backend.saveNote(noteToSave.question_id, content),
+        backend.addFavorite(noteToSave.question_id)
+      ]);
+      const favoriteAt = noteToSave.favorite_at || favorite?.created_at || new Date().toISOString();
+      if (activeNote?.question_id === noteToSave.question_id) {
+        activeNote = { ...(saved || noteToSave), favorite_at: favoriteAt };
+        const activeButton = document.querySelector(".note-choice.active");
+        if (activeButton) {
+          activeButton.dataset.date = formatDateKey(favoriteAt);
+          activeButton.querySelector("span").textContent = formatDate(favoriteAt);
+        }
+      }
+      if (!favoriteQuestionIds.has(noteToSave.question_id)) {
+        favoriteQuestionIds.add(noteToSave.question_id);
+        byId("favoriteCount").textContent = favoriteQuestionIds.size;
+      }
       byId("saveStatus").textContent = "所有更改已保存";
       showToast("笔记已保存到私人后端");
     } catch (error) {
@@ -363,8 +394,7 @@
       (await conceptsResponse.json()).groups || []
     );
     personalSearchReady = true;
-    applyFavoriteFilters();
-    applyNoteFilters();
+    applyLibraryFilters();
   }
 
   async function initialize() {
@@ -397,10 +427,8 @@
 
   window.__userSearchTestApi = {
     get ready() { return personalSearchReady; },
-    applyFavoriteFilters,
-    applyNoteFilters,
-    renderFavorites,
-    renderNotes,
+    applyLibraryFilters,
+    renderLibrary,
     renderResume,
     truncateText
   };
