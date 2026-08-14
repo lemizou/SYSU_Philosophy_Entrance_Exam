@@ -136,6 +136,8 @@
     const sessionEmail = byId("sessionEmail");
     const signOutButton = byId("signOut");
     let pendingEmail = "";
+    let otpRequestPromise = null;
+    let otpReady = false;
     let returnFocus = null;
 
     function setMessage(text, isError = false) {
@@ -183,17 +185,24 @@
       const idleLabel = button.textContent;
       button.disabled = true;
       button.textContent = "发送中…";
-      setMessage("正在发送验证码，请稍候。", false);
+      pendingEmail = String(emailInput.value || "").trim().toLowerCase();
+      otpReady = false;
+      otpInput.disabled = false;
+      otpInput.placeholder = "6 位验证码";
+      otpForm.querySelector("button").disabled = false;
+      setMessage("正在发送验证码，可先在这里等待并填写。", false);
+      otpInput.focus();
+      otpRequestPromise = controller.requestOtp(emailInput.value);
       try {
-        pendingEmail = await controller.requestOtp(emailInput.value);
-        otpInput.disabled = false;
-        otpInput.placeholder = "6 位验证码";
-        otpForm.querySelector("button").disabled = false;
+        pendingEmail = await otpRequestPromise;
+        otpReady = true;
         setMessage(`六位验证码已发送至 ${pendingEmail}，请在当前窗口输入验证码登录。`);
-        otpInput.focus();
       } catch (error) {
+        otpInput.disabled = true;
+        otpForm.querySelector("button").disabled = true;
         setMessage(error.message || "验证码发送失败", true);
       } finally {
+        otpRequestPromise = null;
         button.disabled = false;
         button.textContent = idleLabel;
       }
@@ -204,6 +213,7 @@
       const button = event.currentTarget.querySelector("button");
       button.disabled = true;
       try {
+        if (otpRequestPromise) await otpRequestPromise;
         const session = await controller.verifyOtp(pendingEmail || emailInput.value, otpInput.value);
         setSignedIn(session.user);
         await options.onSignedIn?.(session.user, { source: "otp" });
@@ -211,7 +221,7 @@
       } catch (error) {
         setMessage(error.message || "登录失败", true);
       } finally {
-        button.disabled = false;
+        button.disabled = !otpReady;
       }
     });
 
